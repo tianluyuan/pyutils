@@ -8,7 +8,7 @@ import ROOT as rt
 import math
 import functools
 from array import array
-from tianlu import directories, utils
+from tianlu import utils
 
 
 __author__ = 'Tianlu Yuan'
@@ -671,8 +671,8 @@ def flatten_branch(orig_tree, branch_descriptor, branch_sel='*', sel=''):
     A/D:Table[2]/F:Ntracks/I:astring/C
     The 'Run' index and 'instance' (if it exists) will be automatically added
     """
-    scan_out = os.path.join(directories.TRASH_STORE, 'flatten_branch_scan.txt')
-    txt_out = os.path.join(directories.TRASH_STORE, 'flatten_branch_skim.txt')
+    scan_out = os.path.join('~/.trash', 'flatten_branch_scan.txt')
+    txt_out = os.path.join('~/.trash', 'flatten_branch_skim.txt')
 
     dump_tree(orig_tree, scan_out, branch_sel, sel)
 
