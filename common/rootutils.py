@@ -8,7 +8,7 @@ import ROOT as rt
 import math
 import functools
 from array import array
-from tianlu import utils
+from common import utils
 
 
 __author__ = 'Tianlu Yuan'
