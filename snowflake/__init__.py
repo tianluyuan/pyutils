@@ -1,1 +1,1 @@
-__all__ = ['dirs']
+__all__ = ['dirs', 'library']
