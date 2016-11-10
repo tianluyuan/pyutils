@@ -1,6 +1,8 @@
 """ Useful functions for working with icecube software
 """
 from icecube import icetray
+from icecube.icetray import I3Units
+from icecube import astro
 
 def excluded_doms(frame, exclude_list, keep_partial=True):
     """Returns a list of excluded doms for the current frame based on the
@@ -21,3 +23,25 @@ def excluded_doms(frame, exclude_list, keep_partial=True):
                     excluded.append(k[0])
 
     return excluded
+
+
+def missing(key):
+    """function to check if frame has key. Can be passed to IceTray
+    modules as If parameter
+    """
+    return lambda frame: not frame.Has(key)
+
+
+def print_event(particle, header):
+    """ Prints out conversions of the particle info
+    """
+    mjd = header.start_time.mod_julian_day_double
+    eqtr = astro.I3GetEquatorialFromDirection(particle.dir,
+                                              header.start_time)
+    print header
+    print particle
+    print '------'
+    print 'mjd = {:.2f}'.format(mjd)
+    print 'dec, ra = {:.2f}, {:.2f}'.format(eqtr.dec/I3Units.deg,
+                                            eqtr.ra/I3Units.deg)
+    
