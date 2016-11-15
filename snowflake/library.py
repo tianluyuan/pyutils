@@ -1,8 +1,10 @@
 """ Useful functions for working with icecube software
 """
+from I3Tray import I3Tray
 from icecube import icetray
 from icecube.icetray import I3Units
 from icecube import astro
+from icecube.hdfwriter import I3HDFWriter
 from collections import namedtuple, defaultdict
 import numpy as np
 
@@ -77,3 +79,16 @@ def stringify(all_pulses, min_q=0):
                                                  charges))
 
     return i3strings
+
+
+def hdfwriter(inp, out, subeventstreams=None, keys=None):
+    """ Tabulates inp data into an HDF5 file
+    """
+    tray = I3Tray()
+    tray.Add('I3Reader', filename=inp)
+    tray.Add(I3HDFWriter,
+             output=out,
+             keys=keys,
+             SubEventStreams=subeventstreams)
+    tray.Execute()
+    tray.Finish()
