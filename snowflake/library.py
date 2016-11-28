@@ -3,7 +3,7 @@
 from I3Tray import I3Tray
 from icecube import icetray
 from icecube.icetray import I3Units
-from icecube import astro
+from icecube import astro, millipede
 from icecube.hdfwriter import I3HDFWriter
 from collections import namedtuple, defaultdict
 import numpy as np
@@ -81,7 +81,7 @@ def stringify(all_pulses, min_q=0):
     return i3strings
 
 
-def hdfwriter(inp, out, subeventstreams=None, keys=None):
+def hdfwriter(inp, out, subeventstreams=None, keys=None, types=None):
     """ Tabulates inp data into an HDF5 file
     """
     tray = I3Tray()
@@ -89,6 +89,7 @@ def hdfwriter(inp, out, subeventstreams=None, keys=None):
     tray.Add(I3HDFWriter,
              output=out,
              keys=keys,
-             SubEventStreams=subeventstreams)
+             SubEventStreams=subeventstreams,
+             types=types)
     tray.Execute()
     tray.Finish()
