@@ -2,5 +2,5 @@
 """
 import os
 
-FIG = os.path.expanduser('~tyuan/public_html/share/fig')
-STORE = os.path.expanduser('/data/user/tyuan/store')
+FIG = os.path.join('/home', os.getenv('USER'), 'public_html', 'share', 'fig')
+STORE = os.path.join('/data', 'user', os.getenv('USER'), 'store')
