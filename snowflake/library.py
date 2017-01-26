@@ -11,6 +11,29 @@ import numpy as np
 # namedtuple class for storing charges and times for each dom
 DomInfo = namedtuple('DomInfo', 'dom times charges')
 
+def get_rde_map(resource):
+    """ Builds a map of the rde based on ice-models/resources/
+    """
+    DomEff = namedtuple('DomEff', 'rde grp')
+    data = np.loadtxt(resource)
+    data_map = {}
+    for row in data:
+        data_map[icetray.OMKey(int(row[0]), int(row[1]))] = DomEff(row[2], row[3])
+
+    return data_map
+
+
+def update_dom_cal(frame, rde_map):
+    """ Updates the relative dom efficiencies in dom calibration of I3Calibration
+    """
+    cal = frame['I3Calibration']
+    dom_cal = cal.dom_cal
+    for dom in rde_map:
+        # dom_cal[dom].relative_dom_eff = rde*(1+0.35*grp)
+        if dom_cal.has_key(dom):
+            dom_cal[dom].relative_dom_eff *= rde_map[dom].rde
+
+
 def excluded_doms(frame, exclude_list, keep_partial=True):
     """Returns a list of excluded doms for the current frame based on the
     exclude_list. Partially excluded DOMs are kept by default but if
