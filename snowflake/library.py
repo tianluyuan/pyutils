@@ -6,12 +6,17 @@ from icecube.icetray import I3Units
 from icecube import astro, millipede
 from icecube.hdfwriter import I3HDFWriter
 from collections import namedtuple, defaultdict
+import os
 import numpy as np
 
 # namedtuple class for storing charges and times for each dom
 DomInfo = namedtuple('DomInfo', 'dom times charges')
 
-def get_rde_map(resource):
+def get_rde_map(resource=os.path.join(os.path.expandvars('$I3_SRC'),
+                                      'ice-models',
+                                      'resources', 'models',
+                                      'spice-latest-full',
+                                      'eff-f2k')):
     """ Builds a map of the rde based on ice-models/resources/
     """
     DomEff = namedtuple('DomEff', 'rde grp')
