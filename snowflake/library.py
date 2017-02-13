@@ -3,7 +3,7 @@
 from I3Tray import I3Tray
 from icecube import icetray
 from icecube.icetray import I3Units
-from icecube import astro, millipede
+from icecube import astro
 from icecube.hdfwriter import I3HDFWriter
 from collections import namedtuple, defaultdict
 import os
