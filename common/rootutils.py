@@ -46,7 +46,7 @@ class MultiCanvas(object):
 class Efficiency:
     # namedtuple classes for setting up numer and denom and also vars
     Options = namedtuple('Options', 'name cut tree_key')
-    Var = namedtuple('Var', 'var binning title')
+    Var = namedtuple('Var', 'var binning')
 
     def __init__(self, filepath, num_tup, denom_tup, var_tup):
         """ This class helps create a TEfficiency object based on the passed
@@ -90,8 +90,8 @@ class Efficiency:
         # frac = '{0}/{1}'.format(num_tup.name, denom_tup.name)
         frac = 'Fraction'
         etitle = '{0};{1};{2}'.format(num_tup.name,
-                                     var.replace(':', ';'),
-                                     frac)
+                                      var.replace(':', ';'),
+                                      frac)
         self.efficiency.SetTitle(etitle)
 
 
