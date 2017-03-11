@@ -1058,6 +1058,12 @@ def errors(hist):
     return [hist.GetBinError(i) for i in range(hist.GetSize())]
 
 
+def edges(hist):
+    """ returns the histograms contents in a python list
+    """
+    return [hist.GetBinLowEdge(i) for i in range(hist.GetSize()+1)]
+
+
 def tabulate(hist):
     """returns a list of tuples that represents the histogram's data in
     the format [(bin, content, error),...]
