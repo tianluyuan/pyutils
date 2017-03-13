@@ -61,7 +61,7 @@ def find_and_replace(template_path, out_path, **kwargs):
 
 
 def make_dirs_if_needed(dir_path):
-    if not os.path.isdir(dir_path):
+    if dir_path != '' and not os.path.isdir(dir_path):
         print 'making directory ', dir_path
         os.makedirs(dir_path)
 
