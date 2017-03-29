@@ -1,0 +1,36 @@
+import numpy as np
+
+
+def centers(x):
+    return (x[:-1]+x[1:])*0.5
+
+
+def calc_nbins(x):
+    n =  (np.max(x) - np.min(x)) / (2 * len(x)**(-1/3) * (np.percentile(x, 75) - np.percentile(x, 25)))
+    return np.floor(n)
+
+
+def calc_bins(x):
+    nbins = calc_nbins(x)
+    return np.linspace(np.min(x), np.max(x)+2, num=nbins+1)
+
+
+def cart_to_sphe(x, y, z):
+    r = np.sqrt(x*x+y*y+z*z)
+    theta = np.arccos(z/r)
+    phi = np.arctan(y/x)
+
+    return r, theta, phi
+
+
+def vmf_stats(thetas, phis):
+    """Return the average of directional coordinates assuming they are
+    drawn from a Von-Mises Fisher distribution (gaussian on a sphere)
+    """
+    xsum = np.sum(np.sin(thetas)*np.cos(phis))
+    ysum = np.sum(np.sin(thetas)*np.sin(phis))
+    zsum = np.sum(np.cos(thetas))
+
+    norm = np.sqrt(xsum**2+ysum**2+zsum**2)
+    r, theta, phi = cart_to_sphe(xsum/norm, ysum/norm, zsum/norm)
+    return theta, phi, norm/thetas.size
