@@ -34,5 +34,6 @@ def vmf_stats(thetas, phis, p=3):
     norm = np.sqrt(xsum**2+ysum**2+zsum**2)
     r, theta, phi = cart_to_sphe(xsum/norm, ysum/norm, zsum/norm)
     R = norm/thetas.size
+    # below are approximations
     kappa = R*(p-R**2)/(1-R**2)
     return theta, phi, R, kappa
