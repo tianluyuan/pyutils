@@ -14,7 +14,7 @@ def multipage(filename, figs=None, dpi=200):
     pp.close()
 
 
-def colorlines(x, y, ncolors=5, cmapname='copper_r', **kwargs):
+def colorlines(x, y, ncolors=5, cmapname='viridis_r', **kwargs):
     """Plot a line plot in which the lines change colors as the data is
     stepped through.
 
@@ -27,4 +27,4 @@ def colorlines(x, y, ncolors=5, cmapname='copper_r', **kwargs):
         low = i*chunksize
         # add 1 to keep lines connected
         high = min((i+1)*chunksize+1, len(x))
-        plt.plot(x[low:high], y[low:high], color=cmap(norm(i)))
+        plt.plot(x[low:high], y[low:high], color=cmap(norm(i)), **kwargs)
