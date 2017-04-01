@@ -15,7 +15,10 @@ def multipage(filename, figs=None, dpi=200):
 
 
 def colorlines(x, y, ncolors=5, cmapname='copper_r', **kwargs):
-    """ Plot a line plot in which the lines change colors
+    """Plot a line plot in which the lines change colors as the data is
+    stepped through.
+
+    *ncolors* specifies the number of different colors to use
     """
     cmap = plt.get_cmap(cmapname)
     norm = colors.Normalize(vmin=0, vmax=ncolors-1)
