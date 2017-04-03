@@ -6,7 +6,12 @@ def centers(x):
 
 
 def edges(x):
-    """ returns bin edges with centers that match x. approx "inverse" of center(x).
+    """returns bin edges with centers that approximately match x. approx
+    "inverse" of center(x). Note that it is impossible to ensure that
+    centers(edges(x)) == x for all x using the functions defined in
+    this module as the returned values of centers(e) are subject to
+    constraints that do not necessarily exist for arbitrary center
+    points.
     """
     c = centers(x)
     return np.concatenate(([2*x[0]-c[0]], c, [2*x[-1]-c[-1]]))
