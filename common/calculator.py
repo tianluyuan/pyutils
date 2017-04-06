@@ -30,7 +30,7 @@ def calc_bins(x):
 def cart_to_sphe(x, y, z):
     r = np.sqrt(x*x+y*y+z*z)
     theta = np.arccos(z/r)
-    phi = np.arctan(y/x)
+    phi = np.arctan2(y, x)
 
     return r, theta, phi
 
