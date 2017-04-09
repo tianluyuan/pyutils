@@ -1,6 +1,5 @@
 """ Useful functions for working with icecube software
 """
-import glob
 import os
 import re
 from collections import namedtuple, defaultdict
@@ -113,8 +112,10 @@ def hdfwriter(inp, out, subeventstreams=None, keys=None, types=None):
     """ Tabulates inp data into an HDF5 file
     """
     tray = I3Tray()
-    tray.Add('I3Reader', Filenamelist=glob.glob(inp))
-    tray.Add('I3Reader', filename=inp)
+    if isinstance(inp, str):
+        inp = [inp]
+
+    tray.Add('I3Reader', Filenamelist=inp)
     tray.Add(I3HDFWriter,
              output=out,
              keys=keys,
