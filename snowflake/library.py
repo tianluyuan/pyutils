@@ -1,10 +1,13 @@
-""" Useful functions for working with icecube software
+"""Useful functions for working with icecube software
+
+N.B. don't delete millipede import!!! It is needed to book the
+millipede fit params
 """
 import os
 import re
 from collections import namedtuple, defaultdict
 from I3Tray import I3Tray, I3Units
-from icecube import icetray, dataclasses, astro
+from icecube import icetray, dataclasses, astro, millipede
 from icecube.hdfwriter import I3HDFWriter
 import numpy as np
 
