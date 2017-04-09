@@ -1,11 +1,11 @@
 """ Useful functions for working with icecube software
 """
-from I3Tray import I3Tray, I3Units
-from icecube import icetray, dataclasses
-from icecube import astro
-from icecube.hdfwriter import I3HDFWriter
-from collections import namedtuple, defaultdict
+import glob
 import os
+from collections import namedtuple, defaultdict
+from I3Tray import I3Tray, I3Units
+from icecube import icetray, dataclasses, astro
+from icecube.hdfwriter import I3HDFWriter
 import numpy as np
 
 # namedtuple class for storing charges and times for each dom
@@ -112,6 +112,7 @@ def hdfwriter(inp, out, subeventstreams=None, keys=None, types=None):
     """ Tabulates inp data into an HDF5 file
     """
     tray = I3Tray()
+    tray.Add('I3Reader', Filenamelist=glob.glob(inp))
     tray.Add('I3Reader', filename=inp)
     tray.Add(I3HDFWriter,
              output=out,
@@ -166,4 +167,4 @@ def hese_names(run_id, event_id=None):
     try:
         return names[(run_id, event_id)]
     except KeyError:
-        return '{}, {}'.format(run_id, event_id)
+        return '{} {}'.format(run_id, event_id)
