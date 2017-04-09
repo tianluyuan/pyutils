@@ -2,6 +2,7 @@
 """
 import glob
 import os
+import re
 from collections import namedtuple, defaultdict
 from I3Tray import I3Tray, I3Units
 from icecube import icetray, dataclasses, astro
@@ -168,3 +169,13 @@ def hese_names(run_id, event_id=None):
         return names[(run_id, event_id)]
     except KeyError:
         return '{} {}'.format(run_id, event_id)
+
+def parse_input(inputfile, eventnum=None):
+    """ return the run number parsed from inputfile
+    """
+    filename = os.path.basename(inputfile)
+    m = re.match(r'.*([0-9]{6,8}).*', filename)
+    runnum = m.group(1).lstrip('0')
+    if eventnum is not None and eventnum > 0:
+        runnum += '_{}'.format(eventnum)
+    return runnum
