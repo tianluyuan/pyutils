@@ -1,13 +1,10 @@
 """Useful functions for working with icecube software
-
-N.B. don't delete millipede import!!! It is needed to book the
-millipede fit params
 """
 import os
 import re
 from collections import namedtuple, defaultdict
 from I3Tray import I3Tray, I3Units
-from icecube import icetray, dataclasses, astro, millipede
+from icecube import icetray, dataclasses, astro
 from icecube.hdfwriter import I3HDFWriter
 import numpy as np
 
@@ -113,7 +110,12 @@ def stringify(all_pulses, min_q=0):
 
 def hdfwriter(inp, out, subeventstreams=None, keys=None, types=None):
     """ Tabulates inp data into an HDF5 file
+
+    N.B. don't delete millipede import!!! It is needed to book the
+    millipede fit params
     """
+    from icecube import millipede
+
     tray = I3Tray()
     if isinstance(inp, str):
         inp = [inp]
