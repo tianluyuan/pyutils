@@ -51,7 +51,8 @@ def center_angle(theta0, phi0, theta1, phi1):
     """
     pos1 = sphe_to_cart(1, theta0, phi0)
     pos2 = sphe_to_cart(1, theta1, phi1)
-    return np.arccos(np.dot(pos1, pos2)/(np.linalg.norm(pos1)*np.linalg.norm(pos2)))
+    dotp = np.sum(np.asarray(pos1).T*np.asarray(pos2).T, axis=-1)
+    return np.arccos(dotp)
 
     
 def vmf_stats(thetas, phis, p=3):
