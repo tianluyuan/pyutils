@@ -35,7 +35,7 @@ def cart_to_sphe(x, y, z):
     return r, theta, phi
 
 
-def sph_to_cart(r, theta, phi):
+def sphe_to_cart(r, theta, phi):
     x = r*np.sin(theta)*np.cos(phi)    
     y = r*np.sin(theta)*np.sin(phi)
     z  = r*np.cos(theta)
@@ -43,6 +43,17 @@ def sph_to_cart(r, theta, phi):
     return x, y, z
 
 
+def center_angle(theta0, phi0, theta1, phi1):
+    """given two directions in spherical coordinates calculate the angle
+    between them
+
+    angles should be in radians
+    """
+    pos1 = sphe_to_cart(1, theta0, phi0)
+    pos2 = sphe_to_cart(1, theta1, phi1)
+    return np.arccos(np.dot(pos1, pos2)/(np.linalg.norm(pos1)*np.linalg.norm(pos2)))
+
+    
 def vmf_stats(thetas, phis, p=3):
     """Return the average of directional coordinates assuming they are
     drawn from a Von-Mises Fisher distribution (gaussian on a sphere)
