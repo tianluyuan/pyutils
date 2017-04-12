@@ -35,6 +35,14 @@ def cart_to_sphe(x, y, z):
     return r, theta, phi
 
 
+def sph_to_cart(r, theta, phi):
+    x = r*np.sin(theta)*np.cos(phi)    
+    y = r*np.sin(theta)*np.sin(phi)
+    z  = r*np.cos(theta)
+
+    return x, y, z
+
+
 def vmf_stats(thetas, phis, p=3):
     """Return the average of directional coordinates assuming they are
     drawn from a Von-Mises Fisher distribution (gaussian on a sphere)
