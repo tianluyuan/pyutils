@@ -46,3 +46,38 @@ def pdf(func):
             return func(*args, **kwargs)
 
     return pdfwrapper
+
+
+def restrict_axes(ax, xlim=None, ylim=None):
+    """ Given a matplotlib axis *ax*, restricts the axis limits to xlim
+    and ylim if the current bounds exceed the limits. Otherwise, leave alone.
+
+    *xlim* and *ylim* should be passed as tuples
+    """
+    def new_lims(curr_lim, bounds):
+        """checks whether the current limit exceeds the bounds and returns
+        the appropriate new limits based on bounds or the current
+        limit. Reverse order (i.e. left > right) is allowed and accounted for.
+        """
+        lb, rt = curr_lim
+        if curr_lim[0] < curr_lim[1]:
+            # normal ordering
+            if curr_lim[0] < bounds[0]:
+                lb = bounds[0]
+            if curr_lim[1] > bounds[1]:
+                rt = bounds[1]
+        elif curr_lim[0] > curr_lim[1]:
+            # reverse ordering
+            if curr_lim[0] > bounds[0]:
+                lb = bounds[0]
+            if curr_lim[1] < bounds[1]:
+                rt = bounds[1]
+
+        return lb, rt
+    
+    if xlim is not None:
+        ax.set_xlim(*new_lims(ax.get_xlim(), xlim), auto=None)
+    if ylim is not None:
+        ax.set_ylim(*new_lims(ax.get_ylim(), ylim), auto=None)
+        
+
