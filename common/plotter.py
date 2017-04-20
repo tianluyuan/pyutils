@@ -48,6 +48,30 @@ def pdf(func):
     return pdfwrapper
 
 
+def new_lims(curr_lim, bounds):
+    """checks whether the current limit exceeds the bounds and returns
+    the appropriate new limits based on bounds or the current
+    limit. Reverse order (i.e. left > right) is allowed and accounted for.
+    """
+    lb, rt = curr_lim
+    if lb <= rt:
+        # normal ordering
+        combined = sorted(curr_lim+bounds)
+        # no overlap
+        if tuple(combined[:2]) == (lb, rt) or tuple(combined[2:]) == (lb, rt):
+            return bounds[0], bounds[1]
+
+        return combined[1], combined[2]
+    else:
+        # reverse ordering
+        combined = sorted(curr_lim+bounds, reverse=True)
+        # no overlap
+        if tuple(combined[:2]) == (lb, rt) or tuple(combined[2:]) == (lb, rt):
+            return bounds[0], bounds[1]
+
+        return combined[1], combined[2]
+    
+
 def restrict_axes(ax, xlim=None, ylim=None):
     """Given a matplotlib axis *ax*, restricts the axis limits to xlim and
     ylim if they exceed the bounds (xlim, ylim). If the axis limit
@@ -56,31 +80,6 @@ def restrict_axes(ax, xlim=None, ylim=None):
 
     *xlim* and *ylim* are the restricted ranges and should be passed as tuples
     """
-    def new_lims(curr_lim, bounds):
-        """checks whether the current limit exceeds the bounds and returns
-        the appropriate new limits based on bounds or the current
-        limit. Reverse order (i.e. left > right) is allowed and accounted for.
-        """
-        lb, rt = curr_lim
-        if lb <= rt:
-            # normal ordering
-            combined = sorted(curr_lim+bounds)
-            # no overlap
-            if tuple(combined[:2]) == (lb, rt) or tuple(combined[2:]) == (lb, rt):
-                return bounds[0], bounds[1]
-
-            return combined[1], combined[2]
-        else:
-            # reverse ordering
-            combined = sorted(curr_lim+bounds, reverse=True)
-            # no overlap
-            if tuple(combined[:2]) == (lb, rt) or tuple(combined[2:]) == (lb, rt):
-                return bounds[0], bounds[1]
-
-            return combined[1], combined[2]
-
-        return lb, rt
-    
     if xlim is not None:
         ax.set_xlim(*new_lims(ax.get_xlim(), xlim), auto=None)
     if ylim is not None:
