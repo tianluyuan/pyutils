@@ -49,10 +49,12 @@ def pdf(func):
 
 
 def restrict_axes(ax, xlim=None, ylim=None):
-    """ Given a matplotlib axis *ax*, restricts the axis limits to xlim
-    and ylim if the current bounds exceed the limits. Otherwise, leave alone.
+    """Given a matplotlib axis *ax*, restricts the axis limits to xlim and
+    ylim if they exceed the bounds (xlim, ylim). If the axis limit
+    does not overlap with (xlim, ylim), the new limits are set to
+    (xlim, ylim). Otherwise limits are kept as is.
 
-    *xlim* and *ylim* should be passed as tuples
+    *xlim* and *ylim* are the restricted ranges and should be passed as tuples
     """
     def new_lims(curr_lim, bounds):
         """checks whether the current limit exceeds the bounds and returns
@@ -60,18 +62,22 @@ def restrict_axes(ax, xlim=None, ylim=None):
         limit. Reverse order (i.e. left > right) is allowed and accounted for.
         """
         lb, rt = curr_lim
-        if curr_lim[0] < curr_lim[1]:
+        if lb <= rt:
             # normal ordering
-            if curr_lim[0] < bounds[0]:
-                lb = bounds[0]
-            if curr_lim[1] > bounds[1]:
-                rt = bounds[1]
-        elif curr_lim[0] > curr_lim[1]:
+            combined = sorted(curr_lim+bounds)
+            # no overlap
+            if tuple(combined[:2]) == (lb, rt) or tuple(combined[2:]) == (lb, rt):
+                return bounds[0], bounds[1]
+
+            return combined[1], combined[2]
+        else:
             # reverse ordering
-            if curr_lim[0] > bounds[0]:
-                lb = bounds[0]
-            if curr_lim[1] < bounds[1]:
-                rt = bounds[1]
+            combined = sorted(curr_lim+bounds, reverse=True)
+            # no overlap
+            if tuple(combined[:2]) == (lb, rt) or tuple(combined[2:]) == (lb, rt):
+                return bounds[0], bounds[1]
+
+            return combined[1], combined[2]
 
         return lb, rt
     
