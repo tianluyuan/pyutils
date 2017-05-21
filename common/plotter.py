@@ -1,4 +1,6 @@
 import functools
+import numpy as np
+from scipy import optimize
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib import colors
 import matplotlib.pyplot as plt
@@ -86,3 +88,25 @@ def restrict_axes(ax, xlim=None, ylim=None):
         ax.set_ylim(*new_lims(ax.get_ylim(), ylim), auto=None)
         
 
+def contour_levels(x, y, cls=(0.95, 0.68), bins=None):
+    """given 2D datapoints, return values of the pdf corresponding to the
+    passed confidence levels
+    """
+    if bins is None:
+        bins = int(np.sqrt(len(x)))
+    # Make a 2d normed histogram
+    H,xedges,yedges=np.histogram2d(x,y,bins=bins,normed=True)
+
+    norm=H.sum() # Find the norm of the sum
+
+    # Take histogram bin membership as proportional to Likelihood
+    # This is true when data comes from a Markovian process
+    def objective(limit, target):
+        w = np.where(H>limit)
+        count = H[w]
+        return count.sum() - target
+
+    levels = [optimize.bisect(objective, H.min(), H.max(), args=(cl*norm,))
+              for cl in cls]
+    levels.append(H.max())
+    return levels
