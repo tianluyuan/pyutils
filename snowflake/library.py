@@ -4,7 +4,7 @@ import os
 import re
 from collections import namedtuple, defaultdict
 from I3Tray import I3Tray, I3Units
-from icecube import icetray, dataclasses, astro
+from icecube import icetray, dataclasses, astro, simclasses
 from icecube.hdfwriter import I3HDFWriter
 import numpy as np
 
@@ -106,6 +106,15 @@ def stringify(all_pulses, min_q=0):
                                                  charges))
 
     return i3strings
+
+
+def qtot(all_pulses):
+    """ returns simple qtot summing over charges in pulse series
+    """
+    if isinstance(all_pulses, simclasses.I3MCPESeriesMap):
+        return sum([pulse.npe for pulses in all_pulses.itervalues() for pulse in pulses])
+    else:
+        return sum([pulse.charge for pulses in all_pulses.itervalues() for pulse in pulses])
 
 
 def hdfwriter(inp, out, subeventstreams=None, keys=None, types=None):
