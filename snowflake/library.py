@@ -27,7 +27,14 @@ def get_rde_map(resource=os.path.join(os.path.expandvars('$I3_SRC'),
     return data_map
 
 
-def update_dom_cal(frame, rde_map):
+def update_dom_bad(frame, baddoms):
+    """ Appends extra bad doms to BadDomsList
+    """
+    for bad in baddoms:
+        frame['BadDomsList'].append(bad)
+
+
+def update_dom_eff(frame, rde_map):
     """ Updates the relative dom efficiencies in dom calibration of I3Calibration
     """
     cal = frame['I3Calibration']
