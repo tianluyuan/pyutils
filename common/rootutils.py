@@ -1103,9 +1103,37 @@ def chi2test(hobs, hexp, opts=''):
                                                                pval,
                                                                ndof)
 
-    if 'chi2/ndof' in opts.lower():
+    if 'chi2/ndf' in opts.lower():
         return chi2/ndof
     elif 'chi2' in opts.lower():
         return chi2
     else:
         return pval
+
+
+def reduce_cvm(cvm):
+    """ removes rows and columns along that correspond to 0s on the diagonal
+    """
+    nrows = cvm.GetNrows()
+    assert nrows == cvm.GetNcols()
+    diag = rt.TMatrixDDiag(cvm)
+    nnonzeros = 0
+    inonzeros = []
+    for i in range(diag.GetNdiags()):
+        if diag[i] != 0:
+            nnonzeros += 1
+            inonzeros.append(i)
+
+    to_save = []
+    for i in inonzeros:
+        for j in inonzeros:
+            to_save.append(cvm[i][j])
+
+    rcvm = rt.TMatrixD(nnonzeros, nnonzeros)
+    overall = 0
+    for i in range(nnonzeros):
+        for j in range(nnonzeros):
+            rcvm[i][j] = to_save[overall]
+            overall += 1
+
+    return rcvm
