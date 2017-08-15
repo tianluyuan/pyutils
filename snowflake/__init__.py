@@ -1,1 +1,1 @@
-__all__ = ['dirs', 'library', 'shoveler']
+__all__ = ['dirs', 'library', 'shoveler', 'standalone']
