@@ -28,8 +28,8 @@ def simple_hese_names(run_id, event_id):
         (117322,7422546):'Pepe the King Prawn',	#53
         (117371,31623515):'Crazy Harry',	#55
         (117782,49441871):'Floyd',	#57
-        (118145,5142726):'Oscar'	#59
-        (121240,72944671):'Big Bird'	#59
+        (118145,5142726):'Oscar',	#59
+        (121240,72944671):'Big Bird'	
     }
     try:
         return names[(run_id, event_id)]
