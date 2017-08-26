@@ -8,9 +8,12 @@ from I3Tray import I3Tray, I3Units
 from icecube import icetray, dataclasses, astro, simclasses
 from icecube.hdfwriter import I3HDFWriter
 import numpy as np
+from scipy.stats import poisson
+
 
 # namedtuple class for storing charges and times for each dom
 DomInfo = namedtuple('DomInfo', 'dom times charges')
+
 
 def get_rde_map(resource=os.path.join(os.path.expandvars('$I3_SRC'),
                                       'ice-models',
@@ -168,3 +171,24 @@ def parse_input(inputfile, eventnum=None):
     if eventnum is not None and eventnum > 0:
         runnum += '_{}'.format(eventnum)
     return runnum
+
+
+def poisson_llh(hdata, hexp, hcenter, frame, dom):
+    """ returns the poisson llh evaluated from hexp for the hdata on dom in this frame
+    """
+    iskips = [np.array([False]*len(hcenter))]
+    if frame.Has('CalibrationErrata') and frame['CalibrationErrata'].has_key(dom):
+        for cerrata in frame['CalibrationErrata'][dom]:
+            iskips.append(
+                abs(hcenter-(cerrata.start+cerrata.stop)/(2*I3Units.microsecond)) < (cerrata.stop-cerrata.start)/(2*I3Units.microsecond))
+
+    if frame.Has('SaturationWindows') and frame['SaturationWindows'].has_key(dom):
+        for swindow in frame['SaturationWindows'][dom]:
+            iskips.append(
+                abs(hcenter-(swindow.start+swindow.stop)/(2*I3Units.microsecond)) < (swindow.stop-swindow.start)/(2*I3Units.microsecond))
+
+    ikeep = ~np.any(iskips, axis=0)
+    pllh = poisson.logpmf(np.round(hdata[ikeep]),
+                          hexp[ikeep])
+    plen = np.count_nonzero(~np.isnan(pllh))
+    return -np.nansum(pllh), plen
