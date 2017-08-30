@@ -56,16 +56,6 @@ def center_angle(theta0, phi0, theta1, phi1):
     return np.arccos(dotp)
 
 
-def mean_ang(thetas, phis):
-    """ calculates mean angle given thetas and phis
-    """
-    xsum = np.sum(np.sin(thetas)*np.cos(phis))
-    ysum = np.sum(np.sin(thetas)*np.sin(phis))
-    zsum = np.sum(np.cos(thetas))
-
-    return cart_to_sphe(xsum, ysum, zsum)
-
-
 def vmf_stats(thetas, phis, p=3):
     """Return the average of directional coordinates assuming they are
     drawn from a Von-Mises Fisher distribution (gaussian on a sphere)
@@ -75,11 +65,22 @@ def vmf_stats(thetas, phis, p=3):
     R = norm/thetas.size
     # below are approximations
     kappa = R*(p-R**2)/(1-R**2)
-    return theta, phi, R, kappa, np.median(center_angle(theta, phi, thetas, phis))
+    return theta, phi, R, kappa
 
 
-def med_ang_res(thetas, phis):
-    """ Returns mode direction and median deviation from that as the angular res
+def mean_ang(thetas, phis):
+    """ calculates mean angle given thetas and phis
+    """
+    xsum = np.sum(np.sin(thetas)*np.cos(phis))
+    ysum = np.sum(np.sin(thetas)*np.sin(phis))
+    zsum = np.sum(np.cos(thetas))
+
+    norm, mean_th, mean_phi = cart_to_sphe(xsum, ysum, zsum)
+    return norm, mean_th, mean_phi
+
+
+def mode_ang(thetas, phis):
+    """ Returns mode direction
     """
     if len(thetas) == 0:
         return np.nan, np.nan, np.nan
@@ -94,4 +95,10 @@ def med_ang_res(thetas, phis):
         mode_pixs = np.flatnonzero(counts==counts.max())
 
     norm, mode_th, mode_phi = mean_ang(*hp.pix2ang(nside, mode_pixs))
-    return mode_th, mode_phi, np.median(center_angle(mode_th, mode_phi, thetas, phis))
+    return norm, mode_th, mode_phi, 
+
+
+def med_ang_res(theta, phi, thetas, phis):
+    """ calculate median angular deviation from theta, phi
+    """
+    return np.median(center_angle(theta, phi, thetas, phis))
