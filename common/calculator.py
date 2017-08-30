@@ -1,4 +1,5 @@
 import numpy as np
+import healpy as hp
 
 
 def centers(x):
@@ -68,4 +69,13 @@ def vmf_stats(thetas, phis, p=3):
     R = norm/thetas.size
     # below are approximations
     kappa = R*(p-R**2)/(1-R**2)
-    return theta, phi, R, kappa
+    return theta, phi, R, kappa, np.median(center_angle(theta, phi, thetas, phis))
+
+
+def med_ang_res(thetas, phis):
+    """ Returns mode direction and median deviation from that as the angular res
+    """
+    pixs = hp.ang2pix(32, thetas, phis)
+    mode_pix = np.bincount(pixs).argmax()
+    mode_th, mode_phi = hp.pix2ang(32, mode_pix)
+    return mode_th, mode_phi, np.median(center_angle(mode_th, mode_phi, thetas, phis))
