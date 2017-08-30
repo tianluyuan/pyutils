@@ -72,10 +72,12 @@ def vmf_stats(thetas, phis, p=3):
     return theta, phi, R, kappa, np.median(center_angle(theta, phi, thetas, phis))
 
 
-def med_ang_res(thetas, phis):
+def med_ang_res(thetas, phis, nside=64):
     """ Returns mode direction and median deviation from that as the angular res
     """
-    pixs = hp.ang2pix(32, thetas, phis)
+    if len(thetas) == 0:
+        return np.nan, np.nan, np.nan
+    pixs = hp.ang2pix(nside, thetas, phis)
     mode_pix = np.bincount(pixs).argmax()
-    mode_th, mode_phi = hp.pix2ang(32, mode_pix)
+    mode_th, mode_phi = hp.pix2ang(nside, mode_pix)
     return mode_th, mode_phi, np.median(center_angle(mode_th, mode_phi, thetas, phis))
