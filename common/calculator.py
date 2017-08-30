@@ -55,29 +55,43 @@ def center_angle(theta0, phi0, theta1, phi1):
     dotp = np.sum(np.asarray(pos1).T*np.asarray(pos2).T, axis=-1)
     return np.arccos(dotp)
 
-    
-def vmf_stats(thetas, phis, p=3):
-    """Return the average of directional coordinates assuming they are
-    drawn from a Von-Mises Fisher distribution (gaussian on a sphere)
+
+def mean_ang(thetas, phis):
+    """ calculates mean angle given thetas and phis
     """
     xsum = np.sum(np.sin(thetas)*np.cos(phis))
     ysum = np.sum(np.sin(thetas)*np.sin(phis))
     zsum = np.sum(np.cos(thetas))
 
-    norm = np.sqrt(xsum**2+ysum**2+zsum**2)
-    r, theta, phi = cart_to_sphe(xsum/norm, ysum/norm, zsum/norm)
+    return cart_to_sphe(xsum, ysum, zsum)
+
+
+def vmf_stats(thetas, phis, p=3):
+    """Return the average of directional coordinates assuming they are
+    drawn from a Von-Mises Fisher distribution (gaussian on a sphere)
+    """
+    norm, theta, phi = mean_ang(thetas, phis)
+    
     R = norm/thetas.size
     # below are approximations
     kappa = R*(p-R**2)/(1-R**2)
     return theta, phi, R, kappa, np.median(center_angle(theta, phi, thetas, phis))
 
 
-def med_ang_res(thetas, phis, nside=64):
+def med_ang_res(thetas, phis):
     """ Returns mode direction and median deviation from that as the angular res
     """
     if len(thetas) == 0:
         return np.nan, np.nan, np.nan
+    nside = 128
     pixs = hp.ang2pix(nside, thetas, phis)
-    mode_pix = np.bincount(pixs).argmax()
-    mode_th, mode_phi = hp.pix2ang(nside, mode_pix)
+    counts = np.bincount(pixs)
+    mode_pixs = np.flatnonzero(counts==counts.max())
+    while nside > 16 and len(mode_pixs) > 1:
+        nside /= 2
+        pixs = hp.ang2pix(nside, thetas, phis)
+        counts = np.bincount(pixs)
+        mode_pixs = np.flatnonzero(counts==counts.max())
+
+    norm, mode_th, mode_phi = mean_ang(*hp.pix2ang(nside, mode_pixs))
     return mode_th, mode_phi, np.median(center_angle(mode_th, mode_phi, thetas, phis))
