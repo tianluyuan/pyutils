@@ -73,7 +73,7 @@ def llh_stats(finput, llhchoice='minlast', llhcut=1):
         dl, dx, dy, dz, dt = llhsteps[['rlogl', 'x', 'y', 'z', 't']].std().values
         de = e*np.log10(llhsteps['e']).std()*np.log(10)
         dr = np.sqrt(llhsteps['x']**2+llhsteps['y']**2+llhsteps['z']**2).std()
-        # zenith, azimuth, R, kappa = vmf_stats(np.radians(llhsteps['zenith']), np.radians(llhsteps['azimuth']))
+        # zenith, azimuth, R, kappa, sigma = vmf_stats(np.radians(llhsteps['zenith']), np.radians(llhsteps['azimuth']))
         norm, zenith, azimuth = mean_ang(np.radians(llhsteps['zenith']), np.radians(llhsteps['azimuth']))
         dA = med_ang_res(zenith, azimuth, np.radians(llhsteps['zenith']), np.radians(llhsteps['azimuth']))
 
