@@ -76,7 +76,9 @@ def llh_stats(finput, llhchoice='minlast', llhcut=1):
         # zenith, azimuth, R, kappa, sigma = vmf_stats(np.radians(llhsteps['zenith']), np.radians(llhsteps['azimuth']))
         norm, zenith, azimuth = mean_ang(np.radians(llhsteps['zenith']), np.radians(llhsteps['azimuth']))
         dA = med_ang_res(zenith, azimuth, np.radians(llhsteps['zenith']), np.radians(llhsteps['azimuth']))
+        zenith = np.degrees(zenith)
+        azimuth = np.degrees(azimuth)
 
-    centers = centerz(rlogl, x, y, z, np.degrees(zenith), np.degrees(azimuth), e, t)
+    centers = centerz(rlogl, x, y, z, zenith, azimuth, e, t)
     errors = errorz(dl, dx, dy, dz, dr, np.degrees(dA), de, dt, len(llhsteps))
     return centers, errors
