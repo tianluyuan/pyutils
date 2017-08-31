@@ -44,14 +44,15 @@ def llh_stats(finput, llhchoice='minlast', llhcut=1):
     'last' uses last 5% of steps
     'all' uses all steps
     'minlast' uses min rlogl half of last 10% of steps. used in llh.cxx
+    'llhout' same as 'minlast' but returns the absolute best fit instead of mean
     """
     centerz = namedtuple('centerz', 'rlogl x y z zenith azimuth e t')
     errorz = namedtuple('errorz', 'dl dx dy dz dr dA de dt N')
+    dl = dx = dy = dz = dr = de = dt = dA = 0
+    kappa = np.inf
     if llhchoice == 'min':
         llhsteps = read(finput, llhcut)
         rlogl, x, y, z, zenith, azimuth, e, t = llhsteps.loc[llhsteps['rlogl'].idxmin()].values[1:-2]
-        dl = dx = dy = dz = dr = de = dt = dA = 0
-        kappa = np.inf
     else:
         if llhchoice == 'cut':
             llhsteps = read(finput, llhcut)
@@ -60,7 +61,7 @@ def llh_stats(finput, llhchoice='minlast', llhcut=1):
             # keep only the last 5%
             keep = int(0.05*len(llhfull.index))
             llhsteps = llhfull.iloc[-keep:]
-        elif llhchoice == 'minlast':
+        elif llhchoice == 'minlast' or llhchoice == 'llhout':
             llhfull = read(finput, np.inf)
             keep = int(0.1*len(llhfull.index))
             llhsteps = llhfull.iloc[-keep:].sort_values('rlogl').iloc[:keep/2]
@@ -78,6 +79,9 @@ def llh_stats(finput, llhchoice='minlast', llhcut=1):
         dA = med_ang_res(zenith, azimuth, np.radians(llhsteps['zenith']), np.radians(llhsteps['azimuth']))
         zenith = np.degrees(zenith)
         azimuth = np.degrees(azimuth)
+
+        if llhchoice == 'llhout':
+            x, y, z, zenith, azimuth, e, t = llhsteps.loc[llhsteps['rlogl'].idxmin()].values[2:-2]
 
     centers = centerz(rlogl, x, y, z, zenith, azimuth, e, t)
     errors = errorz(dl, dx, dy, dz, dr, np.degrees(dA), de, dt, len(llhsteps))
