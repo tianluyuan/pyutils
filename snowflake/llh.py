@@ -50,7 +50,7 @@ def llh_stats(finput, llhchoice='minlast', llhcut=1):
     if llhchoice == 'min':
         llhsteps = read(finput, llhcut)
         rlogl, x, y, z, zenith, azimuth, e, t = llhsteps.loc[llhsteps['rlogl'].idxmin()].values[1:-2]
-        dl = dx = dy = dz = dr = de = dt = 0
+        dl = dx = dy = dz = dr = de = dt = dA = 0
         kappa = np.inf
     else:
         if llhchoice == 'cut':
