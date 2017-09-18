@@ -21,7 +21,7 @@ def qtots(dat):
                  in dat['str'].unique() for om in
                  dat.loc[dat['str']==s]['om'].unique()]
 
-    return qtots
+    return np.array(qtots)
     
 
 def read(llhout, llhcut=np.inf):
