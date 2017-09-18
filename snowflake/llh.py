@@ -1,10 +1,12 @@
 import os
+from functools32 import lru_cache
 from collections import namedtuple
 from common.calculator import vmf_stats, mean_ang, med_ang_res
 import pandas as pd
 import numpy as np
 
 
+@lru_cache(1024)
 def qtots(dat):
     """ returns dom-by-dom charge on ppc simulated hit files
     """
