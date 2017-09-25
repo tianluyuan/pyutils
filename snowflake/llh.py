@@ -6,6 +6,12 @@ import pandas as pd
 import numpy as np
 
 
+def nice(icerec):
+    translator = {'cxdx':'3.2+',
+                  'latest-full':'3.2'}
+    return translator[icerec] if translator.has_key(icerec) else icerec
+
+
 @lru_cache(1024)
 def qtots(dat):
     """ returns dom-by-dom charge on ppc simulated hit files
