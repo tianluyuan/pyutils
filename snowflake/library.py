@@ -150,6 +150,22 @@ def hdfwriter(inp, out, subeventstreams=None, keys=None, types=None):
     tray.Finish()
 
 
+def filter_event(inp, out, run, event):
+    def is_event(frame, run, event):
+        return frame['I3EventHeader'].run_id == run and frame['I3EventHeader'].event_id == event
+
+    tray = I3Tray()
+    if isinstance(inp, str):
+        inp = [inp]
+    
+    tray.Add('I3Reader', Filenamelist=inp)
+    tray.Add(is_event, run=run, event=event,
+             streams=[icetray.I3Frame.Physics, icetray.I3Frame.DAQ])
+    tray.Add('I3Writer', 'writer', filename=out,
+             streams=[icetray.I3Frame.Physics, icetray.I3Frame.DAQ])
+    tray.Execute()
+
+    
 def hese_names(run_id, event_id=None):
     """ stolen from ckopper's file. this is probably incomplete.
 
