@@ -189,8 +189,10 @@ def parse_input(inputfile, eventnum=None):
     return runnum
 
 
-def poisson_llh(hdata, hexp, hcenter, frame, dom):
-    """ returns the poisson llh evaluated from hexp for the hdata on dom in this frame
+def ikeep(hcenter, frame, dom):
+    """ hcenter is a histogram in time
+
+    return indices of hcenter that fall outside of the saturation window and calibration errata
     """
     iskips = [np.array([False]*len(hcenter))]
     if frame.Has('CalibrationErrata') and frame['CalibrationErrata'].has_key(dom):
@@ -204,7 +206,13 @@ def poisson_llh(hdata, hexp, hcenter, frame, dom):
                 abs(hcenter-(swindow.start+swindow.stop)/(2*I3Units.microsecond)) < (swindow.stop-swindow.start)/(2*I3Units.microsecond))
 
     ikeep = ~np.any(iskips, axis=0)
-    pllh = poisson.logpmf(np.round(hdata[ikeep]),
-                          hexp[ikeep])
+    return ikeep
+
+
+def poisson_llh(hdata, hexp):
+    """ returns the poisson llh evaluated from hexp for the hdata on dom in this frame
+    """
+    pllh = poisson.logpmf(np.round(hdata),
+                          hexp)
     plen = np.count_nonzero(~np.isnan(pllh))
     return -np.nansum(pllh), plen
