@@ -119,6 +119,6 @@ def poisson_llh(hdata, hexp):
 
 
 def dchi2(hdata, hexp):
-    """ returns the pearson chi2 evaluated from hexp for hdata
+    """ returns the unnormalized chi2 evaluated from hexp for hdata
     """
-    return np.sum((hdata-hexp)**2/hexp), len(hdata)
+    return np.sum((hdata-hexp)**2), len(hdata)
