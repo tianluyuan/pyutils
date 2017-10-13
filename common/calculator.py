@@ -1,5 +1,6 @@
 import numpy as np
 import healpy as hp
+from scipy.stats import poisson
 
 
 def centers(x):
@@ -104,3 +105,18 @@ def med_ang_res(theta, phi, thetas, phis):
     """ calculate median angular deviation from theta, phi
     """
     return np.median(center_angle(theta, phi, thetas, phis))
+
+
+def poisson_llh(hdata, hexp):
+    """ returns the poisson llh evaluated from hexp for the hdata on dom in this frame
+    """
+    pllh = poisson.logpmf(np.round(hdata),
+                          hexp)
+    plen = np.count_nonzero(~np.isnan(pllh))
+    return -np.nansum(pllh), plen
+
+
+def dchi2(hdata, hexp):
+    """ returns the poisson llh evaluated from hexp for the hdata on dom in this frame
+    """
+    return np.sum((hdata-hexp)**2), len(hdata)

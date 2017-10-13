@@ -8,7 +8,6 @@ from I3Tray import I3Tray, I3Units
 from icecube import icetray, dataclasses, astro, simclasses
 from icecube.hdfwriter import I3HDFWriter
 import numpy as np
-from scipy.stats import poisson
 
 
 # namedtuple class for storing charges and times for each dom
@@ -207,12 +206,3 @@ def ikeep(hcenter, frame, dom):
 
     ikeep = ~np.any(iskips, axis=0)
     return ikeep
-
-
-def poisson_llh(hdata, hexp):
-    """ returns the poisson llh evaluated from hexp for the hdata on dom in this frame
-    """
-    pllh = poisson.logpmf(np.round(hdata),
-                          hexp)
-    plen = np.count_nonzero(~np.isnan(pllh))
-    return -np.nansum(pllh), plen
