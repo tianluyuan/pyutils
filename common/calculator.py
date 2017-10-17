@@ -112,10 +112,9 @@ def poisson_llh(hdata, hexp):
 
     *hdata* and *hexp* must have the same length
     """
-    pllh = poisson.logpmf(np.round(hdata),
-                          hexp)
-    plen = np.count_nonzero(~np.isnan(pllh))
-    return -np.nansum(pllh), plen
+    pllh = np.ma.masked_where(hexp==0,
+                              poisson.logpmf(np.round(hdata), hexp))
+    return -np.sum(pllh), pllh.count()
 
 
 def dchi2(hdata, hexp):
