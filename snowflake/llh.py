@@ -35,10 +35,27 @@ def read(llhout, llhcut=np.inf):
 
     *llhout* is the output file from llh 10 or llh 16
     """
+    def parse_losses(vect):
+        """ parse energy loss vector, for cascades it's 1.0.
+        """
+        if isinstance(vect,str):
+            return np.asarray(map(float, str.split(vect)))
+        else:
+            return vect
+
     llhdat = pd.read_csv(llhout, delim_whitespace=True, header=None,
                          names='l rlogl x y z zenith azimuth e t a b'.split(),
                          error_bad_lines=False)
-    llhdat = llhdat.loc[(llhdat['l'].str.isdigit()) | (llhdat['l'] == '+')].apply(pd.to_numeric, errors='ignore')
+    select = (llhdat['l'].str.isdigit()) | (llhdat['l'] == '+')
+    llhdat = llhdat.loc[select].apply(pd.to_numeric, errors='ignore')
+    lssdat = pd.read_csv(llhout, delimiter=':', header=None,
+                         names='ll losses'.split(),
+                         error_bad_lines=False)
+    lssdat = lssdat.loc[(lssdat['ll'] == 'E') & np.roll(select, -2)]
+    lssdat['losses'] = lssdat['losses'].apply(parse_losses)
+    llhdat.reset_index(drop=True, inplace=True)
+    lssdat.reset_index(drop=True, inplace=True)
+    llhdat = pd.concat((llhdat, lssdat), axis=1)
     llhsteps = llhdat.loc[(llhdat['rlogl'] < llhcut)]
     return llhsteps
 
