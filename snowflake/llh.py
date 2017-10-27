@@ -77,7 +77,7 @@ def llh_stats(finput, llhchoice='minlast', llhcut=1):
     kappa = np.inf
     if llhchoice == 'min':
         llhsteps = read(finput, llhcut)
-        rlogl, x, y, z, zenith, azimuth, e, t = llhsteps.loc[llhsteps['rlogl'].idxmin()].values[1:-2]
+        rlogl, x, y, z, zenith, azimuth, e, t = llhsteps.loc[llhsteps['rlogl'].idxmin()][['rlogl', 'x', 'y', 'z', 'zenith', 'azimuth', 'e', 't']]
     else:
         if llhchoice == 'cut':
             llhsteps = read(finput, llhcut)
@@ -94,9 +94,9 @@ def llh_stats(finput, llhchoice='minlast', llhcut=1):
             # avg over all steps
             llhsteps = read(finput, np.inf)
 
-        rlogl, x, y, z, t = llhsteps[['rlogl', 'x', 'y', 'z', 't']].mean().values
+        rlogl, x, y, z, t = llhsteps[['rlogl', 'x', 'y', 'z', 't']].mean()
         e = 10**np.log10(llhsteps['e']).mean()
-        dl, dx, dy, dz, dt = llhsteps[['rlogl', 'x', 'y', 'z', 't']].std().values
+        dl, dx, dy, dz, dt = llhsteps[['rlogl', 'x', 'y', 'z', 't']].std()
         de = e*np.log10(llhsteps['e']).std()*np.log(10)
         dr = np.sqrt(llhsteps['x']**2+llhsteps['y']**2+llhsteps['z']**2).std()
         # zenith, azimuth, R, kappa, sigma = vmf_stats(np.radians(llhsteps['zenith']), np.radians(llhsteps['azimuth']))
@@ -106,7 +106,7 @@ def llh_stats(finput, llhchoice='minlast', llhcut=1):
         azimuth = np.degrees(azimuth)
 
         if llhchoice == 'llhout':
-            x, y, z, zenith, azimuth, e, t = llhsteps.loc[llhsteps['rlogl'].idxmin()].values[2:-2]
+            x, y, z, zenith, azimuth, e, t = llhsteps.loc[llhsteps['rlogl'].idxmin()][['x', 'y', 'z', 'zenith', 'azimuth', 'e', 't']]
 
     centers = centerz(rlogl, x, y, z, zenith, azimuth, e, t)
     errors = errorz(dl, dx, dy, dz, dr, np.degrees(dA), de, dt, len(llhsteps))
