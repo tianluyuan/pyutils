@@ -1,6 +1,6 @@
 import numpy as np
 import healpy as hp
-from scipy.stats import poisson
+from scipy.stats import gamma
 
 
 def centers(x):
@@ -113,7 +113,7 @@ def poisson_llh(hdata, hexp):
     *hdata* and *hexp* must have the same length
     """
     pllh = np.ma.masked_where(hexp==0,
-                              poisson.logpmf(np.round(hdata), hexp))
+                              gamma.logpdf(hexp, hdata+1))
     return -np.sum(pllh), pllh.count()
 
 
