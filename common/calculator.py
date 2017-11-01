@@ -121,3 +121,26 @@ def dchi2(hdata, hexp):
     """ returns the unnormalized chi2 evaluated from hexp for hdata
     """
     return np.sum((hdata-hexp)**2), len(hdata)
+
+
+def dima_llh(hdata, hexp, sigma=0.1, ns=1, nd=1):
+    """ returns dima's llh
+    """
+    s = hexp*ns
+    d = hdata*nd
+    ls = np.ma.masked_where(s+d==0, (s+d)/(ns+nd))
+    ld = ls
+    tol = 1e-8
+
+    if sigma > 0:
+        while True:
+            f = ns*ls-s-np.log(ld/ls)/sigma**2
+            df = 1+(1/(nd*ld)+1/(ns*ls))/sigma**2
+            dls = -f/(ns*df)
+            ls += dls
+            ld = (s+d-ns*ls)/nd
+            if np.all(abs(dls) < tol*ls):
+                break
+
+    dllh = np.log(hexp/ls)+d*np.log(hdata/ld)+np.log(ld/ls)**2/(2*sigma**2)
+    return np.sum(dllh), dllh.count()
