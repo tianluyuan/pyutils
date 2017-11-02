@@ -142,5 +142,5 @@ def dima_llh(hdata, hexp, sigma=0.1, ns=1, nd=1):
             if np.all(abs(dls) < tol*ls):
                 break
 
-    dllh = np.log(hexp/ls)+d*np.log(hdata/ld)+np.log(ld/ls)**2/(2*sigma**2)
+    dllh = s*np.log(hexp/ls)+d*np.log(hdata/ld)+np.log(ld/ls)**2/(2*sigma**2)
     return np.sum(dllh), dllh.count()
