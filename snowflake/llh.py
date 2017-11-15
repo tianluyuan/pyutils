@@ -12,6 +12,13 @@ def nice(icerec):
     return translator[icerec] if translator.has_key(icerec) else icerec
 
 
+def speclator(spec):
+    specl = spec.split('.')
+    icerec = nice(specl[-1])
+    wbr = 'w/brights' if 'qsat100000' in specl else ''
+    return ' '.join((icerec, wbr))
+
+
 @lru_cache(1024)
 def qtots(dat):
     """ returns dom-by-dom charge on ppc simulated hit files
