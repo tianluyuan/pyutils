@@ -45,6 +45,16 @@ def sphe_to_cart(r, theta, phi):
     return x, y, z
 
 
+def sphe_to_kent(theta, phi):
+    """ shift x,y,z->x2,x3,x1 which is the coordinate system used in Kent 1982
+
+    return np.array((x1,x2,x3), ...) which is the format read-in by kent_distribution
+    """
+    xyz = sphe_to_cart(1, theta, phi)
+    xs = np.asarray((xyz[2], xyz[0], xyz[1])).T
+    return xs
+
+
 def center_angle(theta0, phi0, theta1, phi1):
     """given two directions in spherical coordinates calculate the angle
     between them

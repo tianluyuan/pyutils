@@ -1,7 +1,7 @@
 import os
 from functools32 import lru_cache
 from collections import namedtuple
-from common.calculator import vmf_stats, mean_ang, med_ang_res
+from common.calculator import vmf_stats, mean_ang, med_ang_res, sphe_to_kent
 import pandas as pd
 import numpy as np
 
@@ -15,7 +15,7 @@ def nice(icerec):
 def speclator(spec):
     specl = spec.split('.')
     icerec = nice(specl[-1])
-    wbr = 'w/brights' if 'qsat100000' in specl else ''
+    wbr = 'w/brights' if 'qsat1000000' in specl else ''
     return ' '.join((icerec, wbr))
 
 
@@ -118,3 +118,21 @@ def llh_stats(finput, llhchoice='minlast', llhcut=1):
     centers = centerz(rlogl, x, y, z, zenith, azimuth, e, t)
     errors = errorz(dl, dx, dy, dz, dr, np.degrees(dA), de, dt, len(llhsteps))
     return centers, errors
+
+
+def kent(finput):
+    """ Read finput and fit points to kent distribution using 
+    https://github.com/tianluyuan/kent_distribution
+    """
+    import kent_distribution as kd
+    llhsteps = read(finput)
+
+    xs = sphe_to_kent(np.radians(llhsteps['zenith']),
+                      np.radians(llhsteps['azimuth']))
+    if len(xs) > 0:
+        if 'mlpd1.' in finput:
+            return kd.kent_me(xs)
+        else:
+            return kd.kent_mle(xs)
+    else:
+        return None
