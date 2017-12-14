@@ -156,22 +156,18 @@ def dima_llh(hdata, hexp, sigma=0.1, ns=1, nd=1):
     return np.sum(dllh), dllh.count()
 
 
-def most_likely(arr, binning=None):
+def most_likely(arr):
     """ return the densest region given a 1D array of data
     """
-    if binning is None:
-        binning = calc_bins(arr)
+    binning = calc_bins(arr)
     harr = np.histogram(arr, binning)[0]
     return centers(binning)[np.argmax(harr)]
 
 
-def interval(arr, percentile=68., center=None):
+def interval(arr, percentile=68.):
     """returns the *percentile* shortest interval around the
     mode
     """
-    if center is None:
-        center = most_likely(arr)
-
     sarr = sorted(arr)
     delta = np.abs(sarr - center)
     curr_low = np.argmin(delta)
