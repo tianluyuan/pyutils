@@ -168,6 +168,7 @@ def interval(arr, percentile=68.):
     """returns the *percentile* shortest interval around the
     mode
     """
+    center = most_likely(arr)
     sarr = sorted(arr)
     delta = np.abs(sarr - center)
     curr_low = np.argmin(delta)
