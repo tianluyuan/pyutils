@@ -165,7 +165,7 @@ def most_likely(arr):
 
 
 def interval(arr, percentile=68.):
-    """returns the *percentile* highest probability interval around the
+    """returns the *percentile* shortest interval around the
     mode
     """
     center = most_likely(arr)
@@ -180,9 +180,9 @@ def interval(arr, percentile=68.):
             curr_up += 1
         elif curr_up == npoints-1:
             curr_low -= 1
-        elif delta[curr_low-1] < delta[curr_up+1]:
+        elif sarr[curr_up]-sarr[curr_low-1] < sarr[curr_up+1]-sarr[curr_low]:
             curr_low -= 1
-        elif delta[curr_low-1] > delta[curr_up+1]:
+        elif sarr[curr_up]-sarr[curr_low-1] > sarr[curr_up+1]-sarr[curr_low]:
             curr_up += 1
         elif (curr_up - curr_low) % 2:
             # they are equal so step half of the time up and down
@@ -190,4 +190,4 @@ def interval(arr, percentile=68.):
         else:
             curr_up += 1
 
-    return center-delta[curr_low], center, center+delta[curr_up]
+    return sarr[curr_low], center, sarr[curr_up]
