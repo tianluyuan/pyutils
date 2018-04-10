@@ -9,7 +9,9 @@ import numpy as np
 def nice(icerec):
     translator = {'cxdx':'3.2+',
                   'latest-full':'3.2'}
-    return translator[icerec] if translator.has_key(icerec) else icerec
+    for icekey in translator:
+        icerec.replace(icekey, translator[icekey])
+    return icerec
 
 
 def speclator(spec):
