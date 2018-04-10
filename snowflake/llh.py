@@ -14,11 +14,10 @@ def nice(icerec):
     return icerec
 
 
-def speclator(spec):
-    specl = spec.split('.')
-    icerec = nice(specl[-1])
-    wbr = 'w/brights' if 'qsat1000000' in specl else ''
-    return ' '.join((icerec, wbr))
+def speclator(spec, icerec):
+    nicerec = nice(icerec)
+    wbr = 'w/brights' if 'qsat1000000' in spec else ''
+    return ' '.join((nicerec, wbr))
 
 
 @lru_cache(1024)
