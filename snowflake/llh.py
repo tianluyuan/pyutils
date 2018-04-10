@@ -10,7 +10,7 @@ def nice(icerec):
     translator = {'cxdx':'3.2+',
                   'latest-full':'3.2'}
     for icekey in translator:
-        icerec.replace(icekey, translator[icekey])
+        icerec = icerec.replace(icekey, translator[icekey])
     return icerec
 
 
