@@ -38,10 +38,12 @@ def qtots(dat):
     return np.array(qtots)
     
 
-def read(llhout, llhcut=np.inf):
+def read_single(llhout, llhcut=np.inf, lpat=r'^[+0-9]'):
     """ Reads output file from llh and parses the useful bits into a pandas dataframe
 
     *llhout* is the output file from llh 10 or llh 16
+    *llhcut* is the maximum llh to allow
+    *lpat* is the regex pattern to match '+/-[0-9]'
     """
     def parse_losses(vect):
         """ parse energy loss vector, for cascades it's 1.0.
@@ -54,7 +56,7 @@ def read(llhout, llhcut=np.inf):
     llhdat = pd.read_csv(llhout, delim_whitespace=True, header=None,
                          names='l rlogl x y z zenith azimuth e t a b'.split(),
                          error_bad_lines=False)
-    select = (llhdat['l'].str.isdigit()) | (llhdat['l'] == '+')
+    select = llhdat['l'].str.match(lpat)
     llhdat = llhdat.loc[select].apply(pd.to_numeric, errors='ignore')
     lssdat = pd.read_csv(llhout, delimiter=':', header=None,
                          names='ll losses'.split(),
@@ -68,7 +70,14 @@ def read(llhout, llhcut=np.inf):
     return llhsteps
 
 
-def llh_stats(finput, llhchoice='minlast', llhcut=1):
+def read(llhouts, llhcut=np.inf, lpat=r'^[+0-9]'):
+    if isinstance(llhouts, str):
+        return read_single(llhouts, llhcut, lpat)
+    else:
+        return pd.concat([read_single(llhout, llhcut, lpat) for llhout in llhouts])
+
+
+def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]'):
     """ returns stats based on llh output
 
     *llhchoice* can be
@@ -84,23 +93,23 @@ def llh_stats(finput, llhchoice='minlast', llhcut=1):
     dl = dx = dy = dz = dr = de = dt = dA = 0
     kappa = np.inf
     if llhchoice == 'min':
-        llhsteps = read(finput, llhcut)
+        llhsteps = read(finput, llhcut, lpat)
         rlogl, x, y, z, zenith, azimuth, e, t = llhsteps.loc[llhsteps['rlogl'].idxmin()][['rlogl', 'x', 'y', 'z', 'zenith', 'azimuth', 'e', 't']]
     else:
         if llhchoice == 'cut':
-            llhsteps = read(finput, llhcut)
+            llhsteps = read(finput, llhcut, lpat)
         elif llhchoice == 'last':
             llhfull = read(finput, np.inf)
             # keep only the last 5%
             keep = int(0.05*len(llhfull.index))
             llhsteps = llhfull.iloc[-keep:]
         elif llhchoice == 'minlast' or llhchoice == 'llhout':
-            llhfull = read(finput, np.inf)
+            llhfull = read(finput, np.inf, lpat)
             keep = int(0.1*len(llhfull.index))
             llhsteps = llhfull.iloc[-keep:].sort_values('rlogl').iloc[:keep/2]
         elif llhchoice == 'all':
             # avg over all steps
-            llhsteps = read(finput, np.inf)
+            llhsteps = read(finput, np.inf, lpat)
 
         rlogl, x, y, z, t = llhsteps[['rlogl', 'x', 'y', 'z', 't']].mean()
         e = 10**np.log10(llhsteps['e']).mean()
@@ -121,12 +130,12 @@ def llh_stats(finput, llhchoice='minlast', llhcut=1):
     return centers, errors
 
 
-def kent(finput):
+def kent(finput, llhcut=np.inf, lpat=r'^[+0-9]'):
     """ Read finput and fit points to kent distribution using 
     https://github.com/tianluyuan/kent_distribution
     """
     import kent_distribution as kd
-    llhsteps = read(finput)
+    llhsteps = read(finput, llhcut, lpat)
 
     xs = sphe_to_kent(np.radians(llhsteps['zenith']),
                       np.radians(llhsteps['azimuth']))
