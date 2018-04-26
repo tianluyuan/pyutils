@@ -1,7 +1,7 @@
 import os
 from functools32 import lru_cache
 from collections import namedtuple
-from common.calculator import vmf_stats, mean_ang, med_ang_res, sphe_to_kent
+from common.calculator import vmf_stats, mean_ang, med_ang_res, sphe_to_kent, interval
 import pandas as pd
 import numpy as np
 
@@ -90,6 +90,7 @@ def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]'):
     """
     centerz = namedtuple('centerz', 'rlogl x y z zenith azimuth e t')
     errorz = namedtuple('errorz', 'dl dx dy dz dr dA de dt N')
+    intervalz = namedtuple('intervalz', 'elow emode ehigh')
     dl = dx = dy = dz = dr = de = dt = dA = 0
     kappa = np.inf
     if llhchoice == 'min':
@@ -127,7 +128,8 @@ def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]'):
 
     centers = centerz(rlogl, x, y, z, zenith, azimuth, e, t)
     errors = errorz(dl, dx, dy, dz, dr, np.degrees(dA), de, dt, len(llhsteps))
-    return centers, errors
+    intervals = intervalz(*interval(llhsteps['e']))
+    return centers, errors, intervals
 
 
 def kent(finput, llhcut=np.inf, lpat=r'^[+0-9]'):
