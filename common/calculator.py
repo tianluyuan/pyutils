@@ -21,7 +21,7 @@ def edges(x):
 
 def calc_nbins(x):
     n =  (np.max(x) - np.min(x)) / (2 * len(x)**(-1./3) * (np.percentile(x, 75) - np.percentile(x, 25)))
-    return np.floor(n)
+    return 10 if np.isnan(n) else np.floor(n)
 
 
 def calc_bins(x):
@@ -168,6 +168,8 @@ def interval(arr, percentile=68.):
     """returns the *percentile* shortest interval around the
     mode
     """
+    if len(arr) == 0:
+        return np.nan, np.nan, np.nan
     center = most_likely(arr)
     sarr = sorted(arr)
     delta = np.abs(sarr - center)
