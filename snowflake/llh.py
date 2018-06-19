@@ -142,9 +142,6 @@ def kent(finput, llhcut=np.inf, lpat=r'^[+0-9]'):
     xs = sphe_to_kent(np.radians(llhsteps['zenith']),
                       np.radians(llhsteps['azimuth']))
     if len(xs) > 0:
-        if 'mlpd1.' in finput:
-            return kd.kent_me(xs)
-        else:
-            return kd.kent_mle(xs)
+        return kd.kent_mle(xs)
     else:
         return None

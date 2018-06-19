@@ -160,7 +160,7 @@ def most_likely(arr, weights=None):
     """ return the densest region given a 1D array of data
     """
     binning = calc_bins(arr)
-    harr = np.histogram(arr, binning, weights=weights)[0]
+    harr = np.histogram(arr, binning, weights=weights)[0] 
     return centers(binning)[np.argmax(harr)]
 
 
