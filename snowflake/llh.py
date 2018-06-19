@@ -89,7 +89,7 @@ def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]'):
     'llhout' same as 'minlast' but returns the absolute best fit instead of mean
     """
     centerz = namedtuple('centerz', 'rlogl x y z zenith azimuth e t')
-    errorz = namedtuple('errorz', 'dl dx dy dz dr dA de dt N')
+    errorz = namedtuple('errorz', 'dl dx dy dz dr dA de dt N Dxyz')
     intervalz = namedtuple('intervalz', 'elow emode ehigh')
     dl = dx = dy = dz = dr = de = dt = dA = 0
     kappa = np.inf
@@ -115,6 +115,7 @@ def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]'):
         rlogl, x, y, z, t = llhsteps[['rlogl', 'x', 'y', 'z', 't']].mean()
         e = 10**np.log10(llhsteps['e']).mean()
         dl, dx, dy, dz, dt = llhsteps[['rlogl', 'x', 'y', 'z', 't']].std()
+        Dxyz = llhsteps[['x', 'y', 'z']].cov()
         de = e*np.log10(llhsteps['e']).std()*np.log(10)
         dr = np.sqrt(llhsteps['x']**2+llhsteps['y']**2+llhsteps['z']**2).std()
         # zenith, azimuth, R, kappa, sigma = vmf_stats(np.radians(llhsteps['zenith']), np.radians(llhsteps['azimuth']))
@@ -127,7 +128,7 @@ def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]'):
             x, y, z, zenith, azimuth, e, t = llhsteps.loc[llhsteps['rlogl'].idxmin()][['x', 'y', 'z', 'zenith', 'azimuth', 'e', 't']]
 
     centers = centerz(rlogl, x, y, z, zenith, azimuth, e, t)
-    errors = errorz(dl, dx, dy, dz, dr, np.degrees(dA), de, dt, len(llhsteps))
+    errors = errorz(dl, dx, dy, dz, dr, np.degrees(dA), de, dt, len(llhsteps), Dxyz)
     intervals = intervalz(*interval(llhsteps['e']))
     return centers, errors, intervals
 
