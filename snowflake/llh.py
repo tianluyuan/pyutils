@@ -91,7 +91,7 @@ def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]'):
     centerz = namedtuple('centerz', 'rlogl x y z zenith azimuth e t')
     errorz = namedtuple('errorz', 'dl dx dy dz dr dA de dt N Dxyz')
     intervalz = namedtuple('intervalz', 'elow emode ehigh')
-    dl = dx = dy = dz = dr = de = dt = dA = 0
+    dl = dx = dy = dz = dr = de = dt = dA = Dxyz = 0
     kappa = np.inf
     if llhchoice == 'min':
         llhsteps = read(finput, llhcut, lpat)
