@@ -211,7 +211,7 @@ def split_path(p):
     """ Most robust way to split paths, instead of using str.split('/')
     http://stackoverflow.com/questions/3167154/how-to-split-a-dos-path-into-its-components-in-python
     """
-    a,b = os.path.split(p)
+    a,b = os.path.split(os.path.normpath(p))
     return (split_path(a) if len(a) and len(b) else []) + [b]
 
 
