@@ -1,5 +1,4 @@
 import numpy as np
-import healpy as hp
 from scipy.stats import gamma
 
 
@@ -95,6 +94,7 @@ def mean_ang(thetas, phis):
 def mode_ang(thetas, phis):
     """ Returns mode direction
     """
+    import healpy as hp
     if len(thetas) == 0:
         return np.nan, np.nan, np.nan
     nside = 128
