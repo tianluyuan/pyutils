@@ -164,7 +164,7 @@ def most_likely(arr, weights=None):
     return centers(binning)[np.argmax(harr)]
 
 
-def interval(arr, percentile=68.):
+def interval(arr, percentile=68.3):
     """returns the *percentile* shortest interval around the
     mode
     """
