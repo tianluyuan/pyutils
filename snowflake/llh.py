@@ -137,12 +137,12 @@ def kent(finput, llhcut=np.inf, lpat=r'^[+0-9]', verbose=False):
     """ Read finput and fit points to kent distribution using 
     https://github.com/tianluyuan/kent_distribution
     """
-    import kent_distribution as kd
+    from sphere import distribution as sd
     llhsteps = read(finput, llhcut, lpat)
 
     xs = sphe_to_kent(np.radians(llhsteps['zenith']),
                       np.radians(llhsteps['azimuth']))
     if len(xs) > 0:
-        return kd.kent_mle(xs, verbose)
+        return sd.kent_mle(xs, verbose)
     else:
         return None
