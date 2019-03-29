@@ -133,8 +133,8 @@ def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]'):
     return centers, errors, intervals
 
 
-def kent(finput, llhcut=np.inf, lpat=r'^[+0-9]', verbose=False):
-    """ Read finput and fit points to kent distribution using 
+def fb8(finput, llhcut=np.inf, lpat=r'^[+0-9]', verbose=False):
+    """ Read finput and fit points to fb8 distribution using 
     https://github.com/tianluyuan/kent_distribution
     """
     from sphere import distribution as sd
@@ -143,6 +143,6 @@ def kent(finput, llhcut=np.inf, lpat=r'^[+0-9]', verbose=False):
     xs = sphe_to_kent(np.radians(llhsteps['zenith']),
                       np.radians(llhsteps['azimuth']))
     if len(xs) > 0:
-        return sd.kent_mle(xs, verbose)
+        return sd.fb8_mle(xs, verbose)
     else:
         return None
