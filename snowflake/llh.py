@@ -135,7 +135,7 @@ def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]'):
 
 def fb8(finput, llhcut=np.inf, lpat=r'^[+0-9]', verbose=False):
     """ Read finput and fit points to fb8 distribution using 
-    https://github.com/tianluyuan/kent_distribution
+    https://github.com/tianluyuan/sphere
     """
     from sphere import distribution as sd
     llhsteps = read(finput, llhcut, lpat)
