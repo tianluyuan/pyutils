@@ -110,3 +110,22 @@ def contour_levels(x, y, cls=(0.95, 0.68), bins=None):
               for cl in cls]
     levels.append(H.max())
     return levels
+
+
+def hp_ticklabels(zoom=False, lonra=None, latra=None, rot=None):
+    import healpy as hp
+    # coordinate labels
+    ax = plt.gca()
+    azis = range(-150, 181, 30)
+    zens = range(0, 181, 30)
+    azi_offset = rot[0]+lonra[0] if zoom else -180
+    zen_offset = rot[1]+latra[0] if zoom else 0
+    for zc in zens:
+        hp.projtext(azi_offset, 90-zc, "{:.0f}$^\circ$".format(zc), lonlat=True)
+    if zoom:
+        for ac in azis:
+            hp.projtext(ac, zen_offset, "{:.0f}$^\circ$".format(ac), lonlat=True)
+    else:
+        ax.annotate(r"$\bf{-180^\circ}$", xy=(1.7, 0.625), size="medium")
+        ax.annotate(r"$\bf{180^\circ}$", xy=(-1.95, 0.625), size="medium")
+        ax.annotate('Detector', xy=(1, -1), size="medium")
