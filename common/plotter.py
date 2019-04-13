@@ -141,8 +141,11 @@ def hp_ticklabels(coord, zoom=False, lonra=None, latra=None, rot=None):
         # location of other, fixed coordinate
         lon_offset = rot[0]+lonra[0]
         lat_offset = rot[1]+latra[0]
-        lons = lons[(lons>=rot[0]+lonra[0])&(lons<=rot[0]+lonra[1])]
-        lats = lats[(lats>=rot[1]+latra[0])&(lats<=rot[1]+latra[1])]
+
+        if lon_offset > 180:
+            lon_offset -= 360
+        lons = lons[(lons>=lon_offset)&(lons<=lon_offset+lonra[1]-lonra[0])]
+        lats = lats[(lats>=lat_offset)&(lats<=lat_offset+latra[1]-latra[0])]
     else:
         lon_offset = -180
         lat_offset = 0
