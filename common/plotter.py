@@ -137,14 +137,20 @@ def hp_ticklabels(coord, zoom=False, lonra=None, latra=None, rot=None):
     # lonlat coordinates for labels
     lons = np.arange(-150, 181, 30)
     lats = np.arange(-90, 91, 30)
+    if zoom:
+        # location of other, fixed coordinate
+        lon_offset = rot[0]+lonra[0]
+        lat_offset = rot[1]+latra[0]
+        lons = lons[(lons>=rot[0]+lonra[0])&(lons<=rot[0]+lonra[1])]
+        lats = lats[(lats>=rot[1]+latra[0])&(lats<=rot[1]+latra[1])]
+    else:
+        lon_offset = -180
+        lat_offset = 0
     # actual text at those coordinates
     if coord == COORD.det:
         llats = 90-lats
     else:
         llats = lats
-    # location of other, fixed coordinate
-    lon_offset = rot[0]+lonra[0] if zoom else -180
-    lat_offset = rot[1]+latra[0] if zoom else 0
 
     # white outline around text
     pe = [path_effects.Stroke(linewidth=0.7, foreground='white'),
