@@ -118,7 +118,9 @@ def contour_levels(x, y, cls=(0.95, 0.68), bins=None):
 
 
 def coord_label(coord):
-    _ = {COORD.det:'Detector',COORD.eq:'Equatorial',COORD.gal:'Galactic'}
+    _ = {COORD.det:'Detector',
+         COORD.eq:'Equatorial',
+         COORD.gal:'Galactic'}
     return _[coord]
 
 
@@ -142,10 +144,14 @@ def hp_ticklabels(coord, zoom=False, lonra=None, latra=None, rot=None):
         lon_offset = rot[0]+lonra[0]
         lat_offset = rot[1]+latra[0]
 
-        if lon_offset > 180:
-            lon_offset -= 360
-        lons = lons[(lons>=lon_offset)&(lons<=lon_offset+lonra[1]-lonra[0])]
-        lats = lats[(lats>=lat_offset)&(lats<=lat_offset+latra[1]-latra[0])]
+        # # shift and rotate
+        # if lon_offset > 180:
+        #     lon_offset -= 360
+        # if lat_offset > 180:
+        #     lat_offset -= 360
+
+        # lons = lons[(lons>=lon_offset)&(lons<=lon_offset+lonra[1]-lonra[0])]
+        # lats = lats[(lats>=lat_offset)&(lats<=lat_offset+latra[1]-latra[0])]
     else:
         lon_offset = -180
         lat_offset = 0
