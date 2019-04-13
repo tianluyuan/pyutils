@@ -112,20 +112,36 @@ def contour_levels(x, y, cls=(0.95, 0.68), bins=None):
     return levels
 
 
-def hp_ticklabels(zoom=False, lonra=None, latra=None, rot=None):
+def hp_ticklabels(zoom=False, lonra=None, latra=None, rot=None, lcoord=None):
+    """ labels coordinates on a healpy map
+
+    zoom: indicates zoomed-in cartview
+    lonra: longitude range of zoomed-in map
+    latra: latitude range of zoom-in map
+    rot: center of zoomed in map
+    lcoord: label of coordinate system
+    """
     import healpy as hp
     # coordinate labels
     ax = plt.gca()
-    azis = range(-150, 181, 30)
-    zens = range(0, 181, 30)
-    azi_offset = rot[0]+lonra[0] if zoom else -180
-    zen_offset = rot[1]+latra[0] if zoom else 0
-    for zc in zens:
-        hp.projtext(azi_offset, 90-zc, "{:.0f}$^\circ$".format(zc), lonlat=True)
+    # lonlat coordinates for labels
+    lons = np.arange(-150, 181, 30)
+    lats = np.arange(-90, 91, 30)
+    # actual text at those coordinates
+    if lcoord == 'Detector':
+        llats = 90-lats
+    else:
+        llats = lats
+    # location of other, fixed coordinate
+    lon_offset = rot[0]+lonra[0] if zoom else -180
+    lat_offset = rot[1]+latra[0] if zoom else 0
+    for _ in zip(lats, llats):
+        hp.projtext(lon_offset, _[0], "{:.0f}$^\circ$".format(_[1]), lonlat=True)
     if zoom:
-        for ac in azis:
-            hp.projtext(ac, zen_offset, "{:.0f}$^\circ$".format(ac), lonlat=True)
+        for _ in lons:
+            hp.projtext(_, lat_offset,
+                        "{:.0f}$^\circ$".format(_), lonlat=True)
     else:
         ax.annotate(r"$\bf{-180^\circ}$", xy=(1.7, 0.625), size="medium")
         ax.annotate(r"$\bf{180^\circ}$", xy=(-1.95, 0.625), size="medium")
-        ax.annotate('Detector', xy=(1, -1), size="medium")
+        ax.annotate(lcoord, xy=(1, -1), size="medium")
