@@ -3,6 +3,7 @@ import numpy as np
 from scipy import optimize
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib import colors
+import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
 from enum import Enum
 
@@ -144,13 +145,21 @@ def hp_ticklabels(coord, zoom=False, lonra=None, latra=None, rot=None):
     # location of other, fixed coordinate
     lon_offset = rot[0]+lonra[0] if zoom else -180
     lat_offset = rot[1]+latra[0] if zoom else 0
+
+    # white outline around text
+    pe = [path_effects.Stroke(linewidth=0.7, foreground='white'),
+          path_effects.Normal()]
     for _ in zip(lats, llats):
-        hp.projtext(lon_offset, _[0], "{:.0f}$^\circ$".format(_[1]), lonlat=True)
+        hp.projtext(lon_offset, _[0], "{:.0f}$^\circ$".format(_[1]),
+                    lonlat=True, path_effects=pe)
     if zoom:
         for _ in lons:
             hp.projtext(_, lat_offset,
-                        "{:.0f}$^\circ$".format(_), lonlat=True)
+                        "{:.0f}$^\circ$".format(_), lonlat=True,
+                        path_effects=pe)
     else:
         ax.annotate(r"$\bf{-180^\circ}$", xy=(1.7, 0.625), size="medium")
         ax.annotate(r"$\bf{180^\circ}$", xy=(-1.95, 0.625), size="medium")
-        ax.annotate(coord_label(coord), xy=(1, -1), size="medium")
+    ax.annotate(coord_label(coord), xy=(0.8, -0.05),
+                size="medium", xycoords="axes fraction")
+
