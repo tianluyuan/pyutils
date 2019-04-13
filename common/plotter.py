@@ -4,6 +4,10 @@ from scipy import optimize
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib import colors
 import matplotlib.pyplot as plt
+from enum import Enum
+
+
+COORD = Enum('COORD', 'det eq gal')
 
 
 def multipage(filename, figs=None, dpi=200):
@@ -112,7 +116,12 @@ def contour_levels(x, y, cls=(0.95, 0.68), bins=None):
     return levels
 
 
-def hp_ticklabels(zoom=False, lonra=None, latra=None, rot=None, lcoord=None):
+def coord_label(coord):
+    _ = {COORD.det:'Detector',COORD.eq:'Equatorial',COORD.gal:'Galactic'}
+    return _[coord]
+
+
+def hp_ticklabels(coord, zoom=False, lonra=None, latra=None, rot=None):
     """ labels coordinates on a healpy map
 
     zoom: indicates zoomed-in cartview
@@ -128,7 +137,7 @@ def hp_ticklabels(zoom=False, lonra=None, latra=None, rot=None, lcoord=None):
     lons = np.arange(-150, 181, 30)
     lats = np.arange(-90, 91, 30)
     # actual text at those coordinates
-    if lcoord == 'Detector':
+    if coord == COORD.det:
         llats = 90-lats
     else:
         llats = lats
@@ -144,4 +153,4 @@ def hp_ticklabels(zoom=False, lonra=None, latra=None, rot=None, lcoord=None):
     else:
         ax.annotate(r"$\bf{-180^\circ}$", xy=(1.7, 0.625), size="medium")
         ax.annotate(r"$\bf{180^\circ}$", xy=(-1.95, 0.625), size="medium")
-        ax.annotate(lcoord, xy=(1, -1), size="medium")
+        ax.annotate(coord_label(coord), xy=(1, -1), size="medium")
