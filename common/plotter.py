@@ -5,10 +5,11 @@ from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib import colors
 import matplotlib.patheffects as path_effects
 import matplotlib.pyplot as plt
-from enum import Enum
+from collections import namedtuple
 
 
-COORD = Enum('COORD', 'det eq gal')
+CoordSys = namedtuple('CoordSys', 'det eq gal')
+COORD = CoordSys('Detector', 'Equatorial', 'Galactic')
 
 
 def multipage(filename, figs=None, dpi=200):
@@ -117,13 +118,6 @@ def contour_levels(x, y, cls=(0.95, 0.68), bins=None):
     return levels
 
 
-def coord_label(coord):
-    _ = {COORD.det:'Detector',
-         COORD.eq:'Equatorial',
-         COORD.gal:'Galactic'}
-    return _[coord]
-
-
 def hp_ticklabels(coord, zoom=False, lonra=None, latra=None, rot=None):
     """ labels coordinates on a healpy map
 
@@ -175,6 +169,6 @@ def hp_ticklabels(coord, zoom=False, lonra=None, latra=None, rot=None):
     else:
         ax.annotate(r"$\bf{-180^\circ}$", xy=(1.7, 0.625), size="medium")
         ax.annotate(r"$\bf{180^\circ}$", xy=(-1.95, 0.625), size="medium")
-    ax.annotate(coord_label(coord), xy=(0.8, -0.05),
+    ax.annotate(coord, xy=(0.8, -0.05),
                 size="medium", xycoords="axes fraction")
 
