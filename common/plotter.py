@@ -130,25 +130,23 @@ def hp_ticklabels(coord, zoom=False, lonra=None, latra=None, rot=None):
     import healpy as hp
     # coordinate labels
     ax = plt.gca()
-    # lonlat coordinates for labels
-    lons = np.arange(-150, 181, 30)
-    lats = np.arange(-90, 91, 30)
     if zoom:
         # location of other, fixed coordinate
         lon_offset = rot[0]+lonra[0]
         lat_offset = rot[1]+latra[0]
-
-        # # shift and rotate
-        # if lon_offset > 180:
-        #     lon_offset -= 360
-        # if lat_offset > 180:
-        #     lat_offset -= 360
-
-        # lons = lons[(lons>=lon_offset)&(lons<=lon_offset+lonra[1]-lonra[0])]
-        # lats = lats[(lats>=lat_offset)&(lats<=lat_offset+latra[1]-latra[0])]
+        # lonlat coordinates for labels
+        lons = np.arange(np.round(lon_offset,-1),
+                         lon_offset+lonra[1]-lonra[0], 10)
+        lats = np.arange(np.round(lat_offset,-1),
+                         lat_offset+latra[1]-latra[0], 10)
     else:
         lon_offset = -180
         lat_offset = 0
+
+        # lonlat coordinates for labels
+        lons = np.arange(-150, 181, 30)
+        lats = np.arange(-90, 91, 30)
+
     # actual text at those coordinates
     if coord == COORD.det:
         llats = 90-lats
