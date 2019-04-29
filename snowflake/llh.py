@@ -133,7 +133,7 @@ def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]'):
     return centers, errors, intervals
 
 
-def fb8(finput, llhcut=np.inf, lpat=r'^[+0-9]', verbose=False):
+def fb8(finput, llhcut=np.inf, lpat=r'^[+0-9]', verbose=False, fb5_only=False):
     """ Read finput and fit points to fb8 distribution using 
     https://github.com/tianluyuan/sphere
     """
@@ -143,6 +143,6 @@ def fb8(finput, llhcut=np.inf, lpat=r'^[+0-9]', verbose=False):
     xs = sphe_to_kent(np.radians(llhsteps['zenith']),
                       np.radians(llhsteps['azimuth']))
     if len(xs) > 0:
-        return sd.fb8_mle(xs, verbose)
+        return sd.fb8_mle(xs, verbose, fb5_only=fb5_only)
     else:
         return None

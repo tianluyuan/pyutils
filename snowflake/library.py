@@ -206,3 +206,27 @@ def ikeep(hcenter, frame, dom):
 
     ikeep = ~np.any(iskips, axis=0)
     return ikeep
+
+
+# #############################
+# Here broken events are removed
+# #############################
+class RemoveBrokenEvents(icetray.I3ConditionalModule):
+    def __init__(self, context):
+        icetray.I3ConditionalModule.__init__(self, context)
+        self.AddOutBox("OutBox")
+        self.AddParameter("Mask", "Name of the bitmask you want to test")
+
+    def Configure(self):
+        self.mask = self.GetParameter("Mask")
+
+    def Physics(self, fr):
+        try:
+            fr[self.mask].apply(fr)
+        except Exception:
+            pass
+        else:
+            self.PushFrame(fr)
+
+    def DAQ(self, fr):
+        self.PushFrame(fr)
