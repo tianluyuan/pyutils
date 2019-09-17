@@ -135,10 +135,10 @@ def hp_ticklabels(coord, zoom=False, lonra=None, latra=None, rot=None):
         lon_offset = rot[0]+lonra[0]
         lat_offset = rot[1]+latra[0]
         # lonlat coordinates for labels
-        lons = np.arange(np.round(lon_offset,-1),
-                         lon_offset+lonra[1]-lonra[0], 10)
-        lats = np.arange(np.round(lat_offset,-1),
-                         lat_offset+latra[1]-latra[0], 10)
+        lons = np.arange(np.round(lon_offset),
+                         lon_offset+lonra[1]-lonra[0], 2)
+        lats = np.arange(np.round(lat_offset),
+                         lat_offset+latra[1]-latra[0], 2)
     else:
         lon_offset = -180
         lat_offset = 0
@@ -154,7 +154,7 @@ def hp_ticklabels(coord, zoom=False, lonra=None, latra=None, rot=None):
         llats = lats
 
     # white outline around text
-    pe = [path_effects.Stroke(linewidth=0.7, foreground='white'),
+    pe = [path_effects.Stroke(linewidth=1.5, foreground='white'),
           path_effects.Normal()]
     for _ in zip(lats, llats):
         hp.projtext(lon_offset, _[0], "{:.0f}$^\circ$".format(_[1]),
