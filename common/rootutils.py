@@ -102,7 +102,7 @@ class Efficiency:
         legend_text = (self.efficiency.GetTitle()+' (overall: %.4f)'
                        % (float(n_numer)/n_denom))
 
-        print legend_text
+        print(legend_text)
         return legend_text
 
 
@@ -180,9 +180,9 @@ def loop_bins(func):
     '''
     @functools.wraps(func)
     def loop_func(h_temp):
-        for i in xrange(h_temp.GetNbinsX()+2):
-            for j in xrange(h_temp.GetNbinsY()+2):
-                for k in xrange(h_temp.GetNbinsZ()+2):
+        for i in range(h_temp.GetNbinsX()+2):
+            for j in range(h_temp.GetNbinsY()+2):
+                for k in range(h_temp.GetNbinsZ()+2):
                     func(h_temp, i, j, k)
     return loop_func
 
@@ -213,7 +213,7 @@ def project_hist(hist):
     hproj = rt.TH1F('hproj', 'Projection', nbins, minx, maxx)
     hproj.GetXaxis().SetTitle(get_primary_axis(hist).GetTitle())
     hproj.GetYaxis().SetTitle('N')
-    [hproj.Fill(hist.GetBinContent(i)) for i in xrange(hist.GetSize())
+    [hproj.Fill(hist.GetBinContent(i)) for i in range(hist.GetSize())
      if not hist.IsBinOverflow(i) and not hist.IsBinUnderflow(i)]
     return hproj
 
@@ -359,7 +359,7 @@ def draw_inset(main_canv, inset_canv):
     multi_inset.pads[1].cd()
     inset_canv.DrawClonePad()
 
-    raw_input('Enter to continue...')
+    input('Enter to continue...')
     inset_canv_clone = multi_inset.canvas.Clone()
     multi_inset.Close()
     return inset_canv_clone
@@ -502,7 +502,7 @@ def get_branch_pytype(branch):
                        'O':'b'}
     c_type = get_branch_ctype(branch)
 
-    if conversion_dict.has_key(c_type):
+    if c_type in conversion_dict:
         return conversion_dict[c_type]
     else:
         raise KeyError('rootutils.get_branch_pytype: Unknown conversion type')
@@ -877,7 +877,7 @@ def tgt_color_code(number):
                       8:rt.kBlue,
                       82:rt.kOrange}
 
-    return tgt_color_dict[number] if tgt_color_dict.has_key(number) else number
+    return tgt_color_dict[number] if number in tgt_color_dict else number
 
 
 def get_flat1d_bin(bin_nd, hist, inc_overflow):
@@ -994,7 +994,7 @@ def projection_normalize(orig_hist, xaxis=True):
     projaxis = nbinsx if xaxis else nbinsy
 
     # walk over bins in non-projected axis
-    for b in xrange(walkaxis):
+    for b in range(walkaxis):
         projected = (hist.ProjectionX('_px', b, b+1) if xaxis else
                      hist.ProjectionY('_py', b, b+1))
         maxprojected = max(abs(projected.GetMaximum()),
@@ -1004,7 +1004,7 @@ def projection_normalize(orig_hist, xaxis=True):
             continue
 
         # renormalize by stepping over bins in axis we project on
-        for i in xrange(projaxis):
+        for i in range(projaxis):
             xbin, ybin = (i, b) if xaxis else (b, i)
             hist.SetBinContent(xbin, ybin,
                                hist.GetBinContent(xbin, ybin)/maxprojected)
@@ -1068,7 +1068,7 @@ def tabulate(hist):
     """returns a list of tuples that represents the histogram's data in
     the format [(bin, content, error),...]
     """
-    return zip(range(hist.GetSize()), contents(hist), errors(hist))
+    return list(zip(list(range(hist.GetSize())), contents(hist), errors(hist)))
 
 
 def chi2test(hobs, hexp, opts=''):
@@ -1099,9 +1099,9 @@ def chi2test(hobs, hexp, opts=''):
     pval = rt.TMath.Prob(chi2, ndof)
 
     if 'p' in opts.lower():
-        print 'INFO: Chi2 = {0}, Prob = {1}, NDF = {2}'.format(chi2,
+        print('INFO: Chi2 = {0}, Prob = {1}, NDF = {2}'.format(chi2,
                                                                pval,
-                                                               ndof)
+                                                               ndof))
 
     if 'chi2/ndf' in opts.lower():
         return chi2/ndof

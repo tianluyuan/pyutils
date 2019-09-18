@@ -3,7 +3,7 @@
 import os
 import re
 from collections import namedtuple, defaultdict
-import standalone
+from . import standalone
 from I3Tray import I3Tray, I3Units
 from icecube import icetray, dataclasses, astro, simclasses
 from icecube.hdfwriter import I3HDFWriter
@@ -44,7 +44,7 @@ def update_dom_eff(frame, rde_map):
     dom_cal = cal.dom_cal
     for dom in rde_map:
         # dom_cal[dom].relative_dom_eff = rde*(1+0.35*grp)
-        if dom_cal.has_key(dom):
+        if dom in dom_cal:
             dom_cal[dom].relative_dom_eff *= rde_map[dom].rde
 
 
@@ -82,12 +82,12 @@ def print_event(particle, header):
     mjd = header.start_time.mod_julian_day_double
     eqtr = astro.I3GetEquatorialFromDirection(particle.dir,
                                               header.start_time)
-    print header
-    print particle
-    print '------'
-    print 'mjd = {:.2f}'.format(mjd)
-    print 'dec, ra = {:.2f}, {:.2f}'.format(eqtr.dec/I3Units.deg,
-                                            eqtr.ra/I3Units.deg)
+    print(header)
+    print(particle)
+    print('------')
+    print('mjd = {:.2f}'.format(mjd))
+    print('dec, ra = {:.2f}, {:.2f}'.format(eqtr.dec/I3Units.deg,
+                                            eqtr.ra/I3Units.deg))
 
 
 def stringify(all_pulses, min_q=0):
@@ -101,7 +101,7 @@ def stringify(all_pulses, min_q=0):
     """
     i3strings = defaultdict(list)
     # loop over all pulses on doms across all strings
-    for dom in all_pulses.iterkeys():
+    for dom in all_pulses.keys():
         pulses = all_pulses[dom]
         times, charges = [], []
         for pulse in pulses:
@@ -122,9 +122,9 @@ def qtot(all_pulses):
     """ returns simple qtot summing over charges in pulse series
     """
     if isinstance(all_pulses, simclasses.I3MCPESeriesMap):
-        return sum([pulse.npe for pulses in all_pulses.itervalues() for pulse in pulses])
+        return sum([pulse.npe for pulses in all_pulses.values() for pulse in pulses])
     else:
-        return sum([pulse.charge for pulses in all_pulses.itervalues() for pulse in pulses])
+        return sum([pulse.charge for pulses in all_pulses.values() for pulse in pulses])
 
 
 def hdfwriter(inp, out, subeventstreams=None, keys=None, types=None):
@@ -194,12 +194,12 @@ def ikeep(hcenter, frame, dom):
     return indices of hcenter that fall outside of the saturation window and calibration errata
     """
     iskips = [np.array([False]*len(hcenter))]
-    if frame.Has('CalibrationErrata') and frame['CalibrationErrata'].has_key(dom):
+    if frame.Has('CalibrationErrata') and dom in frame['CalibrationErrata']:
         for cerrata in frame['CalibrationErrata'][dom]:
             iskips.append(
                 abs(hcenter-(cerrata.start+cerrata.stop)/(2*I3Units.microsecond)) < (cerrata.stop-cerrata.start)/(2*I3Units.microsecond))
 
-    if frame.Has('SaturationWindows') and frame['SaturationWindows'].has_key(dom):
+    if frame.Has('SaturationWindows') and dom in frame['SaturationWindows']:
         for swindow in frame['SaturationWindows'][dom]:
             iskips.append(
                 abs(hcenter-(swindow.start+swindow.stop)/(2*I3Units.microsecond)) < (swindow.stop-swindow.start)/(2*I3Units.microsecond))

@@ -44,7 +44,7 @@ def pdf(func):
     """
     @functools.wraps(func)
     def pdfwrapper(*args, **kwargs):
-        if kwargs.has_key('pdffile') and kwargs['pdffile'] is not None:
+        if 'pdffile' in kwargs and kwargs['pdffile'] is not None:
             plt.close('all')
 
             ret = func(*args, **kwargs)

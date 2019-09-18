@@ -6,7 +6,7 @@ import zlib
 import subprocess
 import shlex
 import time
-import commands
+import subprocess
 import multiprocessing as mp
 
 
@@ -49,12 +49,12 @@ def find_and_replace(template_path, out_path, **kwargs):
 
     kwargs: keys will be replaced by their values
     """
-    print 'Making:', out_path
+    print('Making:', out_path)
     with open(out_path, 'w') as out_file:
         # This will be the template by which we build the output
         with open(template_path, 'r') as template_file:
             for line in template_file:
-                for key, value in kwargs.iteritems():
+                for key, value in kwargs.items():
                     line = line.replace(key, str(value))
 
                 out_file.write(line)
@@ -62,7 +62,7 @@ def find_and_replace(template_path, out_path, **kwargs):
 
 def make_dirs_if_needed(dir_path):
     if dir_path != '' and not os.path.isdir(dir_path):
-        print 'making directory ', dir_path
+        print('making directory ', dir_path)
         os.makedirs(dir_path)
 
 
@@ -70,7 +70,7 @@ def make_lfcdirs_if_needed(lfn_dir):
     lfc_ls = subprocess.Popen(['lfc-ls', lfn_dir])
     lfc_ls.communicate()
     if lfc_ls.returncode == 1:
-        print 'making directory:', lfn_dir
+        print('making directory:', lfn_dir)
         subprocess.Popen(['lfc-mkdir', '-p', lfn_dir]).communicate()
 
 
@@ -80,7 +80,7 @@ def chunk(l, n):
     if n < 1:
         n = 1
 
-    return [l[i:i+n] for i in xrange(0, len(l), n)]
+    return [l[i:i+n] for i in range(0, len(l), n)]
 
 
 def get_n_jobs(user='tianlu', state='a'):
@@ -116,10 +116,10 @@ def queue_check(user, limit_queued=100, limit_running=float('inf')):
         n_queued = get_n_jobs(user, state='p')
         n_suspended = get_n_jobs(user, state='s')
 
-        print 'Currently there are...'
-        print n_running, 'jobs running'
-        print n_queued, 'jobs queued'
-        print n_suspended, 'jobs suspended'
+        print('Currently there are...')
+        print(n_running, 'jobs running')
+        print(n_queued, 'jobs queued')
+        print(n_suspended, 'jobs suspended')
 
         if (n_queued <= limit_queued and
             n_running <= limit_running and
@@ -127,13 +127,13 @@ def queue_check(user, limit_queued=100, limit_running=float('inf')):
             break
         else:
             if n_suspended > 0:
-                print 'there are jobs suspended so submission will wait'
+                print('there are jobs suspended so submission will wait')
             elif n_queued > limit_queued:
-                print ('the queue is greater than '+str(limit_queued)+''
-                       ' so submission will wait')
+                print(('the queue is greater than '+str(limit_queued)+''
+                       ' so submission will wait'))
             elif n_running > limit_running:
-                print ('the running jobs is greater than '+str(limit_running)+''
-                       ' so submission will wait')
+                print(('the running jobs is greater than '+str(limit_running)+''
+                       ' so submission will wait'))
 
 
             time.sleep(60)
@@ -142,7 +142,7 @@ def queue_check(user, limit_queued=100, limit_running=float('inf')):
 def prompt_yes_no(query):
     """ Prompts the user for yes or no.  Tries to emulate ipython exit prompt.
     """
-    bool_str = raw_input(query+' ')
+    bool_str = input(query+' ')
     if bool_str:
         resp = bool_str.capitalize()[0]
         if resp == 'Y':
@@ -176,12 +176,12 @@ def almost_equal_relative_and_abs(a, b,
 
 
 def process_cmd(cmd, dry_run):
-    print cmd+'\n'
+    print(cmd+'\n')
 
     if not dry_run:
         return subprocess.Popen(cmd, shell=True).communicate()
 
-    print '====================================================='
+    print('=====================================================')
 
 
 def process_cmd_star(cmd_tup):
@@ -222,8 +222,8 @@ def get_cwd():
 
     Try to use 'pawd' command first, on error revert to os.getcwd()
     """
-    return (commands.getoutput('pawd')
-            if not commands.getstatusoutput('pawd')[0] # 0 on success
+    return (subprocess.getoutput('pawd')
+            if not subprocess.getstatusoutput('pawd')[0] # 0 on success
             else os.getcwd())
 
 
@@ -243,7 +243,7 @@ def glob_newest(match_str):
     try:
         return max(glob.iglob(match_str), key=os.path.getctime)
     except ValueError:
-        print 'Error in utils.glob_newest: No matching files for', match_str
+        print('Error in utils.glob_newest: No matching files for', match_str)
 
 
 def frange(x, y, jump):
@@ -270,12 +270,12 @@ def timefn(fn, *args, **kwargs):
         start = time.clock()
         ret = fn(*args, **kwargs)
         end = time.clock()
-        print 'Time elapsed for {0}: {1}'.format(fn.__name__,
-                                             end - start)
+        print('Time elapsed for {0}: {1}'.format(fn.__name__,
+                                             end - start))
 
         return ret
     else:
-        print 'Warning <utils.timefn>: non-callable passed'
+        print('Warning <utils.timefn>: non-callable passed')
 
 
 def midpoints(l):
