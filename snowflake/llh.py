@@ -107,7 +107,7 @@ def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]'):
         elif llhchoice == 'minlast' or llhchoice == 'llhout':
             llhfull = read(finput, np.inf, lpat)
             keep = int(0.1*len(llhfull.index))
-            llhsteps = llhfull.iloc[-keep:].sort_values('rlogl').iloc[:keep/2]
+            llhsteps = llhfull.iloc[-keep:].sort_values('rlogl').iloc[:keep//2]
         elif llhchoice == 'all':
             # avg over all steps
             llhsteps = read(finput, np.inf, lpat)
