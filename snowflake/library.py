@@ -230,3 +230,24 @@ class RemoveBrokenEvents(icetray.I3ConditionalModule):
 
     def DAQ(self, fr):
         self.PushFrame(fr)
+
+
+def get_deposit_energy(mctree):
+    losses = 0
+    for p in mctree:
+        if not p.is_cascade: continue
+        if not p.location_type == dataclasses.I3Particle.InIce: continue
+        if p.shape == p.Dark: continue
+        if p.type in [p.Hadrons, p.PiPlus, p.PiMinus, p.NuclInt]:
+            #hadlosses += p.energy
+            if p.energy < 1*I3Units.GeV:
+                losses += 0.8*p.energy
+            else:
+                energyScalingFactor = 1.0 + ((p.energy/I3Units.GeV/0.399)**-0.130)*(0.467 - 1)
+                losses += energyScalingFactor*p.energy
+        else:
+            #emlosses += p.energy
+            losses += p.energy
+
+    return losses
+
