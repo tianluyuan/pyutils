@@ -19,8 +19,8 @@ def edges(x):
 
 
 def calc_nbins(x):
-    n =  int((np.max(x) - np.min(x)) // (2 * len(x)**(-1./3) * (np.percentile(x, 75) - np.percentile(x, 25))))
-    return 10 if np.isnan(n) else n
+    n =  (np.max(x) - np.min(x)) / (2 * len(x)**(-1./3) * (np.percentile(x, 75) - np.percentile(x, 25)))
+    return 10 if np.isnan(n) else int(n)
 
 
 def calc_bins(x):
