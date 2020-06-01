@@ -52,7 +52,7 @@ def read_single(llhout, llhcut=np.inf, lpat=r'^[+0-9]'):
         """ parse energy loss vector, for cascades it's 1.0.
         """
         if isinstance(vect,str):
-            return np.asarray(map(float, str.split(vect)))
+            return np.asarray([float(_) for _ in str.split(vect)])
         else:
             return vect
 
