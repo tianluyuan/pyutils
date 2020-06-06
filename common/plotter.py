@@ -32,7 +32,7 @@ def colorlines(x, y, ncolors=5, cmapname='viridis_r', **kwargs):
     cmap = plt.get_cmap(cmapname)
     norm = colors.Normalize(vmin=0, vmax=ncolors-1)
     for i in range(ncolors):
-        chunksize = len(x)/ncolors
+        chunksize = len(x)//ncolors
         low = i*chunksize
         # add 1 to keep lines connected
         high = min((i+1)*chunksize+1, len(x))
