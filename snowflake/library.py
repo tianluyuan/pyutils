@@ -5,8 +5,8 @@ import re
 from collections import namedtuple, defaultdict
 from . import standalone
 from I3Tray import I3Tray, I3Units
-from icecube import icetray, dataclasses, astro, simclasses
-from icecube.hdfwriter import I3HDFWriter
+from icecube import icetray, dataclasses, astro, simclasses, millipede
+from icecube.hdfwriter import I3HDFWriter, I3SimHDFWriter
 import numpy as np
 
 
@@ -129,12 +129,7 @@ def qtot(all_pulses):
 
 def hdfwriter(inp, out, subeventstreams=None, keys=None, types=None):
     """ Tabulates inp data into an HDF5 file
-
-    N.B. don't delete millipede import!!! It is needed to book the
-    millipede fit params
     """
-    from icecube import millipede
-
     tray = I3Tray()
     if isinstance(inp, str):
         inp = [inp]
@@ -144,6 +139,23 @@ def hdfwriter(inp, out, subeventstreams=None, keys=None, types=None):
              output=out,
              keys=keys,
              SubEventStreams=subeventstreams,
+             types=types)
+    tray.Execute()
+    tray.Finish()
+
+
+def simhdfwriter(inp, out, runnumber=0, subeventstreams=None, keys=None, types=None):
+    """ Tabulates Q-frames without event headers into an HDF5 file
+    """
+    tray = I3Tray()
+    if isinstance(inp, str):
+        inp = [inp]
+
+    tray.Add('I3Reader', Filenamelist=inp)
+    tray.Add(I3SimHDFWriter,
+             output=out,
+             keys=keys,
+             RunNumber=runnumber,
              types=types)
     tray.Execute()
     tray.Finish()
