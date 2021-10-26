@@ -127,7 +127,7 @@ def qtot(all_pulses):
         return sum([pulse.charge for pulses in all_pulses.values() for pulse in pulses])
 
 
-def hdfwriter(inp, out, subeventstreams=None, keys=None, types=None):
+def hdfwriter(inp, out, subeventstreams=None, keys=None, types=None, fn=None):
     """ Tabulates inp data into an HDF5 file
     """
     tray = I3Tray()
@@ -135,6 +135,8 @@ def hdfwriter(inp, out, subeventstreams=None, keys=None, types=None):
         inp = [inp]
 
     tray.Add('I3Reader', Filenamelist=inp)
+    if fn is not None:
+        tray.Add(fn)
     tray.Add(I3HDFWriter,
              output=out,
              keys=keys,
