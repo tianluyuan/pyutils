@@ -7,6 +7,8 @@ from . import standalone
 from I3Tray import I3Tray, I3Units
 from icecube import icetray, dataclasses, astro, simclasses, millipede
 from icecube.hdfwriter import I3HDFWriter, I3SimHDFWriter
+from icecube.frame_object_diff import segments
+from icecube.BadDomList.BadDomListTraySegment import BadDomList
 import numpy as np
 
 
@@ -265,3 +267,20 @@ def get_deposit_energy(mctree):
 
     return losses
 
+
+def rebuild_gcd(gcddiff, gcdout='GCD.i3.zst', runid=0, issim=False):
+    tray = I3Tray()
+    tray.Add('I3Reader', Filename=gcddiff)
+
+    tray.Add(segments.uncompress,
+             base_path='/data/exp/IceCube/2016/internal-system/PoleBaseGCDs/')
+    tray.Add(BadDomList,
+             Simulation=issim,
+             RunId=runid)
+    tray.Add('I3Writer', Filename=gcdout,
+            Streams=[icetray.I3Frame.Geometry,
+                     icetray.I3Frame.Calibration,
+                     icetray.I3Frame.DetectorStatus])
+
+    tray.Execute()
+    tray.Finish()
