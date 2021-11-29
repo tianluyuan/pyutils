@@ -268,7 +268,7 @@ def get_deposit_energy(mctree):
     return losses
 
 
-def rebuild_gcd(gcddiff, gcdout='GCD.i3.zst', runid=0, issim=False):
+def rebuild_gcd(gcddiff, gcdout='GCD.i3.zst', runid=0, issim=False, writeqp=False):
     tray = I3Tray()
     tray.Add('I3Reader', Filename=gcddiff)
 
@@ -277,10 +277,13 @@ def rebuild_gcd(gcddiff, gcdout='GCD.i3.zst', runid=0, issim=False):
     tray.Add(BadDomList,
              Simulation=issim,
              RunId=runid)
+    streams = [icetray.I3Frame.Geometry,
+               icetray.I3Frame.Calibration,
+               icetray.I3Frame.DetectorStatus]
+    if writeqp:
+        streams.extend([icetray.I3Frame.DAQ, icetray.I3Frame.Physics])
     tray.Add('I3Writer', Filename=gcdout,
-            Streams=[icetray.I3Frame.Geometry,
-                     icetray.I3Frame.Calibration,
-                     icetray.I3Frame.DetectorStatus])
+             Streams=streams)
 
     tray.Execute()
     tray.Finish()
