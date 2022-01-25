@@ -5,7 +5,7 @@ import re
 from collections import namedtuple, defaultdict
 from . import standalone
 from I3Tray import I3Tray, I3Units
-from icecube import icetray, dataclasses, astro, simclasses, millipede
+from icecube import icetray, dataclasses, astro, simclasses, millipede, dataio
 from icecube.hdfwriter import I3HDFWriter, I3SimHDFWriter
 from icecube.frame_object_diff import segments
 from icecube.BadDomList.BadDomListTraySegment import BadDomList
@@ -287,3 +287,16 @@ def rebuild_gcd(gcddiff, gcdout='GCD.i3.zst', runid=0, issim=False, writeqp=Fals
 
     tray.Execute()
     tray.Finish()
+
+
+def splitQ(infile, outdir):
+    """ split Qframes into individual i3 files
+    """
+    with dataio.I3File(infile) as f:
+        while f.more():
+            qfr = f.pop_daq()
+            eve = qfr['I3EventHeader']
+            outfile = dataio.I3File(
+                os.path.join(outdir, f'{eve.run_id}.{eve.event_id}.i3.zst'), 'w')
+            outfile.push(qfr)
+            outfile.close()
