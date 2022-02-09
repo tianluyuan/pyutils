@@ -300,3 +300,18 @@ def splitQ(infile, outdir):
                 os.path.join(outdir, f'{eve.run_id}.{eve.event_id}.i3.zst'), 'w')
             outfile.push(qfr)
             outfile.close()
+
+
+def splitQP(infile, outdir):
+    """ split QPframes into individual i3 files
+    """
+    with dataio.I3File(infile) as f:
+        while f.more():
+            qfr = f.pop_daq()
+            pfr = f.pop_physics()
+            eve = pfr['I3EventHeader']
+            outfile = dataio.I3File(
+                os.path.join(outdir, f'{eve.run_id}.{eve.event_id}.i3.zst'), 'w')
+            outfile.push(qfr)
+            outfile.push(pfr)
+            outfile.close()
