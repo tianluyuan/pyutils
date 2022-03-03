@@ -166,16 +166,21 @@ def simhdfwriter(inp, out, runnumber=0, subeventstreams=None, keys=None, types=N
 
 
 def filter_event(inp, out, run, event):
-    def is_event(frame, run, event):
+    def is_event(frame):
         return frame['I3EventHeader'].run_id == run and frame['I3EventHeader'].event_id == event
 
+    filter_func(inp, out, is_event)
+
+
+def filter_func(inp, out, filter_func=lambda frame:True,
+                filter_streams=[icetray.I3Frame.Physics, icetray.I3Frame.DAQ]):
     tray = I3Tray()
     if isinstance(inp, str):
         inp = [inp]
     
     tray.Add('I3Reader', Filenamelist=inp)
-    tray.Add(is_event, run=run, event=event,
-             streams=[icetray.I3Frame.Physics, icetray.I3Frame.DAQ])
+    tray.Add(filter_func,
+             streams=filter_streams)
     tray.Add('I3Writer', 'writer', filename=out,
              streams=[icetray.I3Frame.Physics, icetray.I3Frame.DAQ])
     tray.Execute()
