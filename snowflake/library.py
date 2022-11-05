@@ -165,24 +165,24 @@ def simhdfwriter(inp, out, runnumber=0, subeventstreams=None, keys=None, types=N
     tray.Finish()
 
 
-def filter_event(inp, out, run, event):
+def filter_event(inp, out, run, event, subevent=None):
     def is_event(frame):
-        return frame['I3EventHeader'].run_id == run and frame['I3EventHeader'].event_id == event
+        return frame['I3EventHeader'].run_id == run and frame['I3EventHeader'].event_id == event and (subevent is None or frame['I3EventHeader'].sub_event_id == subevent)
 
     filter_func(inp, out, is_event)
 
 
-def filter_func(inp, out, filter_func=lambda frame:True,
+def filter_func(inp, out, fn=lambda frame:True,
                 filter_streams=[icetray.I3Frame.Physics, icetray.I3Frame.DAQ]):
     tray = I3Tray()
     if isinstance(inp, str):
         inp = [inp]
     
     tray.Add('I3Reader', Filenamelist=inp)
-    tray.Add(filter_func,
+    tray.Add(fn,
              streams=filter_streams)
     tray.Add('I3Writer', 'writer', filename=out,
-             streams=[icetray.I3Frame.Physics, icetray.I3Frame.DAQ])
+             streams=[icetray.I3Frame.TrayInfo, icetray.I3Frame.Physics, icetray.I3Frame.DAQ])
     tray.Execute()
 
     
@@ -307,7 +307,7 @@ def splitQ(infile, outdir):
             outfile.close()
 
 
-def splitP(infile, outdir, subeventstreams=None):
+def splitP(infile, outdir, subeventstreams=None, append_fname=False):
     """ split Pframes into individual i3 files
     """
     with dataio.I3File(infile) as f:
@@ -320,7 +320,7 @@ def splitP(infile, outdir, subeventstreams=None):
                 continue
             parents = f.get_mixed_frames()
             outfile = dataio.I3File(
-                os.path.join(outdir, f'{eve.run_id}.{eve.event_id}.i3.zst'), 'w')
+                os.path.join(outdir, f'{eve.run_id}.{eve.event_id}.{os.path.basename(infile) if append_fname else "i3.zst"}'), 'w')
             for parent_frame in parents:
                 outfile.push(parent_frame)
             outfile.push(pfr)
