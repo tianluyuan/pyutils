@@ -58,12 +58,11 @@ def read_single(llhout, llhcut=np.inf, lpat=r'^[+0-9]'):
 
     llhdat = pd.read_csv(llhout, delim_whitespace=True, header=None,
                          names='l rlogl x y z zenith azimuth e t a b'.split(),
-                         error_bad_lines=False)
+                          usecols=lambda x: x[0] in 'lrxyzaetb')
     select = llhdat['l'].str.match(lpat)
     llhdat = llhdat.loc[select].apply(pd.to_numeric, errors='ignore')
     lssdat = pd.read_csv(llhout, delimiter=':', header=None,
-                         names='ll losses'.split(),
-                         error_bad_lines=False)
+                         names='ll losses'.split(), usecols=lambda x: x[0] == 'l')
     lssdat = lssdat.loc[(lssdat['ll'] == 'E') & np.roll(select, -2)]
     lssdat['losses'] = lssdat['losses'].apply(parse_losses)
     llhdat.reset_index(drop=True, inplace=True)
