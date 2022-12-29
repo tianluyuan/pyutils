@@ -36,7 +36,7 @@ def colorlines(x, y, ncolors=5, cmapname='viridis_r', **kwargs):
         low = i*chunksize
         # add 1 to keep lines connected
         high = min((i+1)*chunksize+1, len(x))
-        plt.plot(x[low:high], y[low:high], color=cmap(norm(i)), **kwargs)
+        plt.plot(x.iloc[low:high], y.iloc[low:high], color=cmap(norm(i)), **kwargs)
 
 
 def pdf(func):
