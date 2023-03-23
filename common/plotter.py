@@ -169,4 +169,3 @@ def hp_ticklabels(coord, zoom=False, lonra=None, latra=None, rot=None):
         ax.annotate(r"$\bf{180^\circ}$", xy=(-1.95, 0.625), size="medium")
     ax.annotate(coord, xy=(0.8, -0.05),
                 size="medium", xycoords="axes fraction")
-

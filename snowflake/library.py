@@ -2,6 +2,7 @@
 """
 import os
 import re
+import copy
 from collections import namedtuple, defaultdict
 from . import standalone
 from I3Tray import I3Tray, I3Units
@@ -11,6 +12,9 @@ from icecube.frame_object_diff import segments
 from icecube.BadDomList.BadDomListTraySegment import BadDomList
 import numpy as np
 
+# Constants
+THC = dataclasses.I3Constants.theta_cherenkov
+CCC = dataclasses.I3Constants.c
 
 # namedtuple class for storing charges and times for each dom
 DomInfo = namedtuple('DomInfo', 'dom times charges')
@@ -325,3 +329,83 @@ def splitP(infile, outdir, subeventstreams=None, append_fname=False):
                 outfile.push(parent_frame)
             outfile.push(pfr)
             outfile.close()
+
+
+def refine_vertex_time(vertex, time, direction, pulses, omgeo):
+    min_d = np.inf
+    min_t = time
+    adj_d = 0
+    for om in pulses.keys():
+        rvec = omgeo[om].position-vertex
+        _l = -rvec*direction
+        _d = np.sqrt(rvec.mag2-_l**2) # closest approach distance
+        if _d < min_d: # closest om
+            min_d = _d
+            min_t = pulses[om][0].time
+            adj_d = _l+_d/np.tan(THC)-_d/(np.cos(THC)*np.sin(THC)) # translation distance
+    if np.isinf(min_d):
+        return time
+    return min_t + adj_d/CCC
+
+
+################## pulse cleaning
+def _weighted_quantile_arg(values, weights, q=0.5):
+    indices = np.argsort(values)
+    sorted_indices = np.arange(len(values))[indices]
+    medianidx = (weights[indices].cumsum()/weights[indices].sum()).searchsorted(q)
+    if (0 <= medianidx) and (medianidx < len(values)):
+        return sorted_indices[medianidx]
+    else:
+        return np.nan
+
+def weighted_quantile(values, weights, q=0.5):
+    if len(values) != len(weights):
+        raise ValueError("shape of `values` and `weights` don't match!")
+    index = _weighted_quantile_arg(values, weights, q=q)
+    if not np.isnan(index):
+        return values[index]
+    else:
+        return np.nan
+
+def weighted_median(values, weights):
+    return weighted_quantile(values, weights, q=0.5)
+
+def late_pulse_cleaning(frame, Pulses, Residual=3e3*I3Units.ns):
+    pulses = dataclasses.I3RecoPulseSeriesMap.from_frame(frame, Pulses)
+    mask = dataclasses.I3RecoPulseSeriesMapMask(frame, Pulses)
+    counter, charge = 0, 0
+    qtot = 0
+    times = dataclasses.I3TimeWindowSeriesMap()
+    for omkey, ps in pulses.items():
+        if len(ps) < 2:
+            if len(ps) == 1:
+                qtot += ps[0].charge
+            continue
+        ts = np.asarray([p.time for p in ps])
+        cs = np.asarray([p.charge for p in ps])
+        median = weighted_median(ts, cs)
+        qtot += cs.sum()
+        ### DEBUG
+        # if cs.sum()>200:
+        #     from matplotlib import pyplot as plt
+        #     plt.figure()
+        #     plt.hist(ts, bins=np.arange(median-0.5*Residual, median+3*Residual, 50), weights=cs, histtype='step')
+        #     [plt.vlines(_, 0, 10) for _ in [median-Residual, median, median+Residual]]
+        #     plt.title(omkey)
+        #     plt.yscale('log')
+        #     plt.savefig(f'out/misc/pulses/{omkey.string}_{omkey.om}.png')
+        for p in ps:
+            if p.time >= (median+Residual):
+                if not times.has_key(omkey):
+                    ts = dataclasses.I3TimeWindowSeries()
+                    ts.append(dataclasses.I3TimeWindow(median+Residual, np.inf)) # this defines the **excluded** time window
+                    times[omkey] = ts
+                mask.set(omkey, p, False)
+                counter += 1
+                charge += p.charge
+    frame[Pulses+"LatePulseCleaned"] = mask
+    frame[Pulses+"LatePulseCleanedTimeWindows"] = times
+    try:
+        frame[Pulses+"LatePulseCleanedTimeRange"] = copy.deepcopy(frame[Pulses+"TimeRange"])
+    except KeyError:
+        frame[Pulses+"LatePulseCleanedTimeRange"] = copy.deepcopy(frame["CalibratedWaveformRange"])
