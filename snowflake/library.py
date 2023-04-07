@@ -370,7 +370,7 @@ def weighted_quantile(values, weights, q=0.5):
 def weighted_median(values, weights):
     return weighted_quantile(values, weights, q=0.5)
 
-def late_pulse_cleaning(frame, Pulses, Residual=3e3*I3Units.ns):
+def late_pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
     pulses = dataclasses.I3RecoPulseSeriesMap.from_frame(frame, Pulses)
     mask = dataclasses.I3RecoPulseSeriesMapMask(frame, Pulses)
     counter, charge = 0, 0
