@@ -20,7 +20,8 @@ def nice(icerec):
 def speclator(spec, icerec):
     nicerec = nice(icerec)
     wbr = 'w/brights' if 'qsat1000000' in spec else ''
-    return ' '.join((nicerec, wbr))
+    mlp = 'track' if 'mlpd1' in spec else 'cascade'
+    return ' '.join((nicerec, mlp, wbr))
 
 
 @lru_cache(1024)
