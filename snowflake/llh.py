@@ -80,7 +80,7 @@ def read(llhouts, llhcut=np.inf, lpat=r'^[+0-9]'):
         return pd.concat([read_single(llhout, llhcut, lpat) for llhout in llhouts])
 
 
-def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]', mlpd_npad=10):
+def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]', mlpd_npad=12):
     """ returns stats based on llh output
 
     *llhchoice* can be
