@@ -80,25 +80,32 @@ def read(llhouts, llhcut=np.inf, lpat=r'^[+0-9]'):
         return pd.concat([read_single(llhout, llhcut, lpat) for llhout in llhouts])
 
 
-def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]'):
+def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]', mlpd_npad=10):
     """ returns stats based on llh output
 
     *llhchoice* can be
     'min' returns the absolute best fit... in this case there are no errors
-    'cut' uses fits with rlogl<1
+    'cut' uses fits with rlogl<llhcut
     'last' uses last 5% of steps
     'all' uses all steps
     'minlast' uses min rlogl half of last 10% of steps. used in llh.cxx
     'llhout' same as 'minlast' but returns the absolute best fit instead of mean
+
+    *mlpd_npad* sets the number of 7.5m steps to exclude in the first and last part of
+    MLPD=1. This reduces contributions to the energy reconstruction from large stochastics
+    fitted outside of the detector.
     """
-    centerz = namedtuple('centerz', 'rlogl x y z zenith azimuth e t')
-    errorz = namedtuple('errorz', 'dl dx dy dz dr dA de dt N Dxyz')
-    intervalz = namedtuple('intervalz', 'elow emode ehigh')
+    Centers = namedtuple('Centers', 'rlogl x y z zenith azimuth e t')
+    Errors = namedtuple('Errors', 'dl dx dy dz dr dA de dt N Dxyz')
+    Intervals = namedtuple('Intervals', 'elow emode ehigh')
     dl = dx = dy = dz = dr = de = dt = dA = Dxyz = 0
     kappa = np.inf
+    fn_npad = lambda frs: np.sum(frs[mlpd_npad:-mlpd_npad]) if isinstance(frs, np.ndarray) else 1
     if llhchoice == 'min':
         llhsteps = read(finput, llhcut, lpat)
-        rlogl, x, y, z, zenith, azimuth, e, t = llhsteps.loc[llhsteps['rlogl'].idxmin()][['rlogl', 'x', 'y', 'z', 'zenith', 'azimuth', 'e', 't']]
+        llhsteps['e'] *= llhsteps['losses'].apply(fn_npad)
+        rlogl, x, y, z, zenith, azimuth, e, t = llhsteps.loc[llhsteps['rlogl'].idxmin()][
+            ['rlogl', 'x', 'y', 'z', 'zenith', 'azimuth', 'e', 't']]
     else:
         if llhchoice == 'cut':
             llhsteps = read(finput, llhcut, lpat)
@@ -115,6 +122,7 @@ def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]'):
             # avg over all steps
             llhsteps = read(finput, np.inf, lpat)
 
+        llhsteps['e'] *= llhsteps['losses'].apply(fn_npad)
         rlogl, x, y, z, t = llhsteps[['rlogl', 'x', 'y', 'z', 't']].mean()
         e = 10**np.log10(llhsteps['e']).mean()
         dl, dx, dy, dz, dt = llhsteps[['rlogl', 'x', 'y', 'z', 't']].std()
@@ -130,9 +138,9 @@ def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]'):
         if llhchoice == 'llhout':
             x, y, z, zenith, azimuth, e, t = llhsteps.loc[llhsteps['rlogl'].idxmin()][['x', 'y', 'z', 'zenith', 'azimuth', 'e', 't']]
 
-    centers = centerz(rlogl, x, y, z, zenith, azimuth, e, t)
-    errors = errorz(dl, dx, dy, dz, dr, np.degrees(dA), de, dt, len(llhsteps), Dxyz)
-    intervals = intervalz(*interval(llhsteps['e']))
+    centers = Centers(rlogl, x, y, z, zenith, azimuth, e, t)
+    errors = Errors(dl, dx, dy, dz, dr, np.degrees(dA), de, dt, len(llhsteps), Dxyz)
+    intervals = Intervals(*interval(llhsteps['e']))
     return centers, errors, intervals
 
 
