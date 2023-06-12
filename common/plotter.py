@@ -118,7 +118,7 @@ def contour_levels(x, y, cls=(0.95, 0.68), bins=None):
     return levels
 
 
-def hp_ticklabels(coord, zoom=False, lonra=None, latra=None, rot=None):
+def hp_ticklabels(coord, zoom=False, lonra=None, latra=None, rot=None, poles=True):
     """ labels coordinates on a healpy map
 
     zoom: indicates zoomed-in cartview
@@ -145,7 +145,8 @@ def hp_ticklabels(coord, zoom=False, lonra=None, latra=None, rot=None):
 
         # lonlat coordinates for labels
         lons = np.arange(-150, 181, 30)
-        lats = np.arange(-90, 91, 30)
+        lat_start = 90 if poles else 60
+        lats = np.arange(-lat_start, lat_start+1, 30)
 
     # actual text at those coordinates
     if coord == COORD.det:
