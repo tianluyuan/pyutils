@@ -5,7 +5,7 @@ import re
 import copy
 from collections import namedtuple, defaultdict
 from . import standalone
-from I3Tray import I3Tray, I3Units
+from icecube.icetray import I3Tray, I3Units
 from icecube import icetray, dataclasses, astro, simclasses, millipede, dataio
 from icecube.hdfwriter import I3HDFWriter, I3SimHDFWriter
 from icecube.frame_object_diff import segments
