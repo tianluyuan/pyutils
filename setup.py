@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-setup(name='pyutilz',
+setup(name='pyutils_hep',
       version='0.1.0',
       description='A package with useful python tools',
       url='https://github.com/tianluyuan/pyutils',
