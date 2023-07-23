@@ -376,11 +376,21 @@ def late_pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
     counter, charge = 0, 0
     qtot = 0
     times = dataclasses.I3TimeWindowSeriesMap()
+    all_ts = []
+    all_cs = []
     for omkey, ps in pulses.items():
-        if len(ps) < 2:
-            if len(ps) == 1:
-                qtot += ps[0].charge
-            continue
+        ts = np.asarray([p.time for p in ps])
+        all_ts.extend(ts)
+        cs = np.asarray([p.charge for p in ps])
+        all_cs.extend(cs)
+    all_wm = weighted_median(np.asarray(all_ts), np.asarray(all_cs))
+    tw_start = all_wm + 2*Residual - 6000
+    tw_stop = all_wm + 2*Residual
+    for omkey, ps in pulses.items():
+        # if len(ps) < 2:
+        #     if len(ps) == 1:
+        #         qtot += ps[0].charge
+        #     continue
         ts = np.asarray([p.time for p in ps])
         cs = np.asarray([p.charge for p in ps])
         median = weighted_median(ts, cs)
@@ -394,18 +404,32 @@ def late_pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
         #     plt.title(omkey)
         #     plt.yscale('log')
         #     plt.savefig(f'out/misc/pulses/{omkey.string}_{omkey.om}.png')
+        ts_kept = []
+        cs_kept = []
         for p in ps:
-            if p.time >= (median+Residual):
+            latest_time = min(median+Residual, tw_stop)
+            if p.time >= latest_time or p.time < tw_start:
                 if not times.has_key(omkey):
                     ts = dataclasses.I3TimeWindowSeries()
-                    ts.append(dataclasses.I3TimeWindow(median+Residual, np.inf)) # this defines the **excluded** time window
+                    ts.append(dataclasses.I3TimeWindow(latest_time, np.inf)) # this defines the **excluded** time window
                     times[omkey] = ts
                 mask.set(omkey, p, False)
                 counter += 1
                 charge += p.charge
+            else:
+                ts_kept.append(p.time)
+                cs_kept.append(p.charge)
+        dts = np.ediff1d(ts_kept)
+        if np.median(dts)>1200 or len(ts_kept) < 2:
+            if frame.Has('BrightDOMs'):
+                frame['BrightDOMs'].append(omkey)
+            else:
+                frame['BrightDOMs'] = dataclasses.I3VectorOMKey([omkey])
+
     frame[Pulses+"LatePulseCleaned"] = mask
     frame[Pulses+"LatePulseCleanedTimeWindows"] = times
-    try:
-        frame[Pulses+"LatePulseCleanedTimeRange"] = copy.deepcopy(frame[Pulses+"TimeRange"])
-    except KeyError:
-        frame[Pulses+"LatePulseCleanedTimeRange"] = copy.deepcopy(frame["CalibratedWaveformRange"])
+    # try:
+    #     frame[Pulses+"LatePulseCleanedTimeRange"] = copy.deepcopy(frame[Pulses+"TimeRange"])
+    # except KeyError:
+    #     frame[Pulses+"LatePulseCleanedTimeRange"] = copy.deepcopy(frame["CalibratedWaveformRange"])
+    frame[Pulses+"LatePulseCleanedTimeRange"] = dataclasses.I3TimeWindow(tw_start, tw_stop)
