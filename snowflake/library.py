@@ -358,6 +358,7 @@ def _weighted_quantile_arg(values, weights, q=0.5):
     else:
         return np.nan
 
+
 def weighted_quantile(values, weights, q=0.5):
     if len(values) != len(weights):
         raise ValueError("shape of `values` and `weights` don't match!")
@@ -367,8 +368,10 @@ def weighted_quantile(values, weights, q=0.5):
     else:
         return np.nan
 
+
 def weighted_median(values, weights):
     return weighted_quantile(values, weights, q=0.5)
+
 
 def late_pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
     pulses = dataclasses.I3RecoPulseSeriesMap.from_frame(frame, Pulses)
@@ -383,27 +386,13 @@ def late_pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
         all_ts.extend(ts)
         cs = np.asarray([p.charge for p in ps])
         all_cs.extend(cs)
-    all_wm = weighted_median(np.asarray(all_ts), np.asarray(all_cs))
-    tw_start = all_wm + 2*Residual - 6000
-    tw_stop = all_wm + 2*Residual
+    tw_start = weighted_quantile(np.asarray(all_ts), np.asarray(all_cs), 0.1) - 1000
+    tw_stop = weighted_quantile(np.asarray(all_ts), np.asarray(all_cs), 0.95) + 1000
     for omkey, ps in pulses.items():
-        # if len(ps) < 2:
-        #     if len(ps) == 1:
-        #         qtot += ps[0].charge
-        #     continue
         ts = np.asarray([p.time for p in ps])
         cs = np.asarray([p.charge for p in ps])
         median = weighted_median(ts, cs)
         qtot += cs.sum()
-        ### DEBUG
-        # if cs.sum()>200:
-        #     from matplotlib import pyplot as plt
-        #     plt.figure()
-        #     plt.hist(ts, bins=np.arange(median-0.5*Residual, median+3*Residual, 50), weights=cs, histtype='step')
-        #     [plt.vlines(_, 0, 10) for _ in [median-Residual, median, median+Residual]]
-        #     plt.title(omkey)
-        #     plt.yscale('log')
-        #     plt.savefig(f'out/misc/pulses/{omkey.string}_{omkey.om}.png')
         for p in ps:
             latest_time = min(median+Residual, tw_stop)
             if p.time >= latest_time or p.time < tw_start:
@@ -415,7 +404,7 @@ def late_pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
                 counter += 1
                 charge += p.charge
         dts = np.ediff1d(ts)
-        if np.median(dts)>1200:
+        if np.median(dts) > 1200 and len(dts) > 1:
             if frame.Has('BrightDOMs'):
                 frame['BrightDOMs'].append(omkey)
             else:
@@ -424,8 +413,4 @@ def late_pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
 
     frame[Pulses+"LatePulseCleaned"] = mask
     frame[Pulses+"LatePulseCleanedTimeWindows"] = times
-    # try:
-    #     frame[Pulses+"LatePulseCleanedTimeRange"] = copy.deepcopy(frame[Pulses+"TimeRange"])
-    # except KeyError:
-    #     frame[Pulses+"LatePulseCleanedTimeRange"] = copy.deepcopy(frame["CalibratedWaveformRange"])
     frame[Pulses+"LatePulseCleanedTimeRange"] = dataclasses.I3TimeWindow(tw_start, tw_stop)
