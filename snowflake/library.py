@@ -404,8 +404,6 @@ def late_pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
         #     plt.title(omkey)
         #     plt.yscale('log')
         #     plt.savefig(f'out/misc/pulses/{omkey.string}_{omkey.om}.png')
-        ts_kept = []
-        cs_kept = []
         for p in ps:
             latest_time = min(median+Residual, tw_stop)
             if p.time >= latest_time or p.time < tw_start:
@@ -416,15 +414,13 @@ def late_pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
                 mask.set(omkey, p, False)
                 counter += 1
                 charge += p.charge
-            else:
-                ts_kept.append(p.time)
-                cs_kept.append(p.charge)
-        dts = np.ediff1d(ts_kept)
-        if np.median(dts)>1200 or len(ts_kept) < 2:
+        dts = np.ediff1d(ts)
+        if np.median(dts)>1200:
             if frame.Has('BrightDOMs'):
                 frame['BrightDOMs'].append(omkey)
             else:
                 frame['BrightDOMs'] = dataclasses.I3VectorOMKey([omkey])
+            continue
 
     frame[Pulses+"LatePulseCleaned"] = mask
     frame[Pulses+"LatePulseCleanedTimeWindows"] = times
