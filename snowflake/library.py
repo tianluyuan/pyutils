@@ -395,12 +395,11 @@ def late_pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
         dts = np.ediff1d(ts)
         median_dts = np.median(dts)
         qtot += cs.sum()
-        for p in ps:
+        for p in ps:            
             if median_dts > 1200 and len(dts) > 1:
                 # attempt to mask out correlated noise
                 mask.set(omkey, p, False)
-            elif p.time >= latest_time or p.time < tw_start:
-                latest_time = min(median+Residual, tw_stop)
+            elif p.time >= (latest_time := min(median+Residual, tw_stop)) or p.time < tw_start:
                 if not times.has_key(omkey):
                     ts = dataclasses.I3TimeWindowSeries()
                     ts.append(dataclasses.I3TimeWindow(latest_time, np.inf)) # this defines the **excluded** time window
