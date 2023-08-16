@@ -392,10 +392,15 @@ def late_pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
         ts = np.asarray([p.time for p in ps])
         cs = np.asarray([p.charge for p in ps])
         median = weighted_median(ts, cs)
+        dts = np.ediff1d(ts)
+        median_dts = np.median(dts)
         qtot += cs.sum()
         for p in ps:
-            latest_time = min(median+Residual, tw_stop)
-            if p.time >= latest_time or p.time < tw_start:
+            if median_dts > 1200 and len(dts) > 1:
+                # attempt to mask out correlated noise
+                mask.set(omkey, p, False)
+            elif p.time >= latest_time or p.time < tw_start:
+                latest_time = min(median+Residual, tw_stop)
                 if not times.has_key(omkey):
                     ts = dataclasses.I3TimeWindowSeries()
                     ts.append(dataclasses.I3TimeWindow(latest_time, np.inf)) # this defines the **excluded** time window
@@ -403,13 +408,6 @@ def late_pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
                 mask.set(omkey, p, False)
                 counter += 1
                 charge += p.charge
-        dts = np.ediff1d(ts)
-        if np.median(dts) > 1200 and len(dts) > 1:
-            if frame.Has('BrightDOMs'):
-                frame['BrightDOMs'].append(omkey)
-            else:
-                frame['BrightDOMs'] = dataclasses.I3VectorOMKey([omkey])
-            continue
 
     frame[Pulses+"LatePulseCleaned"] = mask
     frame[Pulses+"LatePulseCleanedTimeWindows"] = times
