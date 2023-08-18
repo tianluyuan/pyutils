@@ -373,7 +373,7 @@ def weighted_median(values, weights):
     return weighted_quantile(values, weights, q=0.5)
 
 
-def late_pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
+def pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
     pulses = dataclasses.I3RecoPulseSeriesMap.from_frame(frame, Pulses)
     mask = dataclasses.I3RecoPulseSeriesMapMask(frame, Pulses)
     counter, charge = 0, 0
@@ -400,14 +400,16 @@ def late_pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
                 # attempt to mask out correlated noise
                 mask.set(omkey, p, False)
             elif p.time >= (latest_time := min(median+Residual, tw_stop)) or p.time < tw_start:
-                if not times.has_key(omkey):
-                    ts = dataclasses.I3TimeWindowSeries()
-                    ts.append(dataclasses.I3TimeWindow(latest_time, np.inf)) # this defines the **excluded** time window
-                    times[omkey] = ts
+                if omkey not in times:
+                    tws = dataclasses.I3TimeWindowSeries()
+                    tws.append(
+                        dataclasses.I3TimeWindow(latest_time, numpy.inf)
+                        )  # this defines the **excluded** time window
+                    times[omkey] = tws
                 mask.set(omkey, p, False)
                 counter += 1
                 charge += p.charge
 
-    frame[Pulses+"LatePulseCleaned"] = mask
-    frame[Pulses+"LatePulseCleanedTimeWindows"] = times
-    frame[Pulses+"LatePulseCleanedTimeRange"] = dataclasses.I3TimeWindow(tw_start, tw_stop)
+    frame[Pulses+"PulseCleaned"] = mask
+    frame[Pulses+"PulseCleanedTimeWindows"] = times
+    frame[Pulses+"PulseCleanedTimeRange"] = dataclasses.I3TimeWindow(tw_start, tw_stop)
