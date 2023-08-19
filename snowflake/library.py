@@ -403,7 +403,7 @@ def pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
                 if omkey not in times:
                     tws = dataclasses.I3TimeWindowSeries()
                     tws.append(
-                        dataclasses.I3TimeWindow(latest_time, numpy.inf)
+                        dataclasses.I3TimeWindow(latest_time, np.inf)
                         )  # this defines the **excluded** time window
                     times[omkey] = tws
                 mask.set(omkey, p, False)
