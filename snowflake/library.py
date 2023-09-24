@@ -386,8 +386,8 @@ def pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
         all_ts.extend(ts)
         cs = np.asarray([p.charge for p in ps])
         all_cs.extend(cs)
-    tw_start = weighted_quantile(np.asarray(all_ts), np.asarray(all_cs), 0.1) - 1000
-    tw_stop = weighted_quantile(np.asarray(all_ts), np.asarray(all_cs), 0.95) + 1000
+    tw_start = max(weighted_quantile(np.asarray(all_ts), np.asarray(all_cs), 0.1) - 1000, min(all_ts))
+    tw_stop = min(weighted_quantile(np.asarray(all_ts), np.asarray(all_cs), 0.95) + 1000, max(all_ts))
     for omkey, ps in pulses.items():
         ts = np.asarray([p.time for p in ps])
         cs = np.asarray([p.charge for p in ps])
