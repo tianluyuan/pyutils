@@ -6,7 +6,7 @@ import copy
 from collections import namedtuple, defaultdict
 from . import standalone
 from icecube.icetray import I3Tray, I3Units
-from icecube import icetray, dataclasses, astro, simclasses, millipede, dataio
+from icecube import icetray, dataclasses, simclasses, millipede, dataio
 from icecube.hdfwriter import I3HDFWriter, I3SimHDFWriter
 from icecube.frame_object_diff import segments
 from icecube.BadDomList.BadDomListTraySegment import BadDomList
@@ -85,6 +85,7 @@ def missing(key):
 def print_event(particle, header):
     """ Prints out conversions of the particle info
     """
+    from icecube import astro
     mjd = header.start_time.mod_julian_day_double
     eqtr = astro.I3GetEquatorialFromDirection(particle.dir,
                                               header.start_time)
@@ -257,13 +258,71 @@ class RemoveBrokenEvents(icetray.I3ConditionalModule):
         self.PushFrame(fr)
 
 
+def isem(particle):
+    return particle.type in [
+        dataclasses.I3Particle.ParticleType.EMinus,
+        dataclasses.I3Particle.ParticleType.EPlus,
+        dataclasses.I3Particle.ParticleType.Brems,
+        dataclasses.I3Particle.ParticleType.DeltaE,
+        dataclasses.I3Particle.ParticleType.PairProd,
+        dataclasses.I3Particle.ParticleType.Gamma,
+        # Pi0 decays to 2 gammas and produce EM showers
+        dataclasses.I3Particle.ParticleType.Pi0,
+        dataclasses.I3Particle.ParticleType.EMinus,
+        dataclasses.I3Particle.ParticleType.EMinus,
+        ]
+
+
+def ishadron(particle):
+    return particle.type in [
+        dataclasses.I3Particle.ParticleType.Hadrons,
+        dataclasses.I3Particle.ParticleType.Neutron,
+        dataclasses.I3Particle.ParticleType.PiPlus,
+        dataclasses.I3Particle.ParticleType.PiMinus,
+        dataclasses.I3Particle.ParticleType.K0_Long,
+        dataclasses.I3Particle.ParticleType.KPlus,
+        dataclasses.I3Particle.ParticleType.KMinus,
+        dataclasses.I3Particle.ParticleType.PPlus,
+        dataclasses.I3Particle.ParticleType.PMinus,
+        dataclasses.I3Particle.ParticleType.K0_Short,
+        dataclasses.I3Particle.ParticleType.Eta,
+        dataclasses.I3Particle.ParticleType.Lambda,
+        dataclasses.I3Particle.ParticleType.SigmaPlus,
+        dataclasses.I3Particle.ParticleType.Sigma0,
+        dataclasses.I3Particle.ParticleType.SigmaMinus,
+        dataclasses.I3Particle.ParticleType.Xi0,
+        dataclasses.I3Particle.ParticleType.XiMinus,
+        dataclasses.I3Particle.ParticleType.OmegaMinus,
+        dataclasses.I3Particle.ParticleType.NeutronBar,
+        dataclasses.I3Particle.ParticleType.LambdaBar,
+        dataclasses.I3Particle.ParticleType.SigmaMinusBar,
+        dataclasses.I3Particle.ParticleType.Sigma0Bar,
+        dataclasses.I3Particle.ParticleType.SigmaPlusBar,
+        dataclasses.I3Particle.ParticleType.Xi0Bar,
+        dataclasses.I3Particle.ParticleType.XiPlusBar,
+        dataclasses.I3Particle.ParticleType.OmegaPlusBar,
+        dataclasses.I3Particle.ParticleType.DPlus,
+        dataclasses.I3Particle.ParticleType.DMinus,
+        dataclasses.I3Particle.ParticleType.D0,
+        dataclasses.I3Particle.ParticleType.D0Bar,
+        dataclasses.I3Particle.ParticleType.DsPlus,
+        dataclasses.I3Particle.ParticleType.DsMinusBar,
+        dataclasses.I3Particle.ParticleType.LambdacPlus,
+        dataclasses.I3Particle.ParticleType.WPlus,
+        dataclasses.I3Particle.ParticleType.WMinus,
+        dataclasses.I3Particle.ParticleType.Z0,
+        dataclasses.I3Particle.ParticleType.NuclInt,
+        dataclasses.I3Particle.ParticleType.WeakInt,
+        ]
+
+
 def get_deposit_energy(mctree):
     losses = 0
     for p in mctree:
         if not p.is_cascade: continue
         if not p.location_type == dataclasses.I3Particle.InIce: continue
         if p.shape == p.Dark: continue
-        if p.type in [p.Hadrons, p.PiPlus, p.PiMinus, p.NuclInt]:
+        if ishadron(p):
             #hadlosses += p.energy
             if p.energy < 1*I3Units.GeV:
                 losses += 0.8*p.energy
@@ -399,7 +458,8 @@ def pulse_cleaning(frame, Pulses, Residual=1.5e3*I3Units.ns):
             if median_dts > 1200 and len(dts) > 1:
                 # attempt to mask out correlated noise
                 mask.set(omkey, p, False)
-            elif p.time >= (latest_time := min(median+Residual, tw_stop)) or p.time < tw_start:
+            elif p.time >= min(median+Residual, tw_stop) or p.time < tw_start:
+                latest_time = min(median+Residual, tw_stop)
                 if omkey not in times:
                     tws = dataclasses.I3TimeWindowSeries()
                     tws.append(
