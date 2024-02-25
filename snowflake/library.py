@@ -10,6 +10,7 @@ from icecube import icetray, dataclasses, simclasses, millipede, dataio
 from icecube.hdfwriter import I3HDFWriter, I3SimHDFWriter
 from icecube.frame_object_diff import segments
 from icecube.BadDomList.BadDomListTraySegment import BadDomList
+from icecube.sim_services import ShowerParameters
 import numpy as np
 
 # Constants
@@ -322,16 +323,7 @@ def get_deposit_energy(mctree):
         if not p.is_cascade: continue
         if not p.location_type == dataclasses.I3Particle.InIce: continue
         if p.shape == p.Dark: continue
-        if ishadron(p):
-            #hadlosses += p.energy
-            if p.energy < 1*I3Units.GeV:
-                losses += 0.8*p.energy
-            else:
-                energyScalingFactor = 1.0 + ((p.energy/I3Units.GeV/0.399)**-0.130)*(0.467 - 1)
-                losses += energyScalingFactor*p.energy
-        else:
-            #emlosses += p.energy
-            losses += p.energy
+        losses += ShowerParameters(p.type, p.energy).emScale * p.energy
 
     return losses
 
