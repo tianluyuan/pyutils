@@ -50,9 +50,8 @@ def update_dom_eff(frame, rde_map):
     cal = frame['I3Calibration']
     dom_cal = cal.dom_cal
     for dom in rde_map:
-        # dom_cal[dom].relative_dom_eff = rde*(1+0.35*grp)
         if dom in dom_cal:
-            dom_cal[dom].relative_dom_eff *= rde_map[dom].rde
+            dom_cal[dom].relative_dom_eff = rde_map[dom].rde*(1+0.35*rde_map[dom].grp)
 
 
 def excluded_doms(frame, exclude_list, keep_partial=True):
