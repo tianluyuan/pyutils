@@ -28,6 +28,7 @@ def total_size(o, handlers={}, verbose=False):
         d = dict(a=1, b=2, c=3, d=[4,5,6,7], e='a string of chars')
         print(total_size(d, verbose=True))
 
+    https://code.activestate.com/recipes/577504-compute-memory-footprint-of-an-object-and-its-cont/
     """
     dict_handler = lambda d: chain.from_iterable(d.items())
     all_handlers = {tuple: iter,
