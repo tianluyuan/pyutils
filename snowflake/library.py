@@ -172,7 +172,10 @@ def simhdfwriter(inp, out, runnumber=0, subeventstreams=None, keys=None, types=N
 
 def filter_event(inp, out, run, event, subevent=None):
     def is_event(frame):
-        return frame['I3EventHeader'].run_id == run and frame['I3EventHeader'].event_id == event and (subevent is None or frame['I3EventHeader'].sub_event_id == subevent)
+        return (frame.Has('I3EventHeader') and
+                frame['I3EventHeader'].run_id == run and
+                frame['I3EventHeader'].event_id == event and
+                (subevent is None or frame['I3EventHeader'].sub_event_id == subevent))
 
     filter_func(inp, out, is_event)
 
