@@ -1,9 +1,9 @@
-from icecube.icetray import I3Units
-from icecube import icetray, dataio, dataclasses, millipede, DomTools
-from icecube import WaveCalibrator, wavedeform, photonics_service
-from icecube import gulliver, gulliver_modules, phys_services
+from icecube import icetray, dataclasses, millipede
+from icecube import phys_services
 import numpy
 from snowflake import library
+import logging
+logger = logging.getLogger(__name__)
 
 
 class Unfold(icetray.I3Module):
@@ -34,7 +34,6 @@ class Unfold(icetray.I3Module):
 
         self.AddOutBox('OutBox')
 
-
     def Configure(self):
         self.input_loss_vect_name = self.GetParameter('Loss_Vector_Name')
         self.pulses = self.GetParameter('Pulses')
@@ -44,20 +43,14 @@ class Unfold(icetray.I3Module):
         self.ppb = self.GetParameter('PhotonsPerBin')
         self.bs = self.GetParameter('BinSigma')
 
-
     def Physics(self, frame):
-        # try:
-        # global hitinfo
-        # global observedq
-        # global expectedq
-        # global qtimebins
         if not frame.Has(self.input_loss_vect_name):
-            print('no unfolding for {}'.format(self.input_loss_vect_name))
+            logger.warning('no unfolding for {}'.format(self.input_loss_vect_name))
             self.PushFrame(frame)
             return True
 
         self.millipede = millipede.PyPyMillipede(self.context)
-        print('Lets unfold the true losses')
+        logger.info('Lets unfold the true losses')
         caddict = {}
         ObQtotdict = {}
         ObQdict = {}
@@ -66,8 +59,6 @@ class Unfold(icetray.I3Module):
 
         if self.input_loss_vect_name == 'I3MCTree':
             I3MCTree = frame['I3MCTree']
-            # if loss.energy>1 and (loss.pos.x**2+loss.pos.y**2)**.5<600 and
-            # loss.pos.z<600 and loss.pos.z>-600]
             sources = [
                 loss for loss in I3MCTree.get_daughters(
                     I3MCTree.first_child(
@@ -77,7 +68,7 @@ class Unfold(icetray.I3Module):
         else:
             sources = frame[self.input_loss_vect_name]
         for s in sources:
-            print('time:', s.time, 'energy:', s.energy)
+            logger.info('time:', s.time, 'energy:', s.energy)
 
         # This line needs to call get_photonics not the service itself
         self.millipede.SetParameter('CascadePhotonicsService', self.cscd_service)
@@ -87,7 +78,7 @@ class Unfold(icetray.I3Module):
         self.millipede.SetParameter('BinSigma', self.bs)
         self.millipede.DatamapFromFrame(frame)
         response = self.millipede.GetResponseMatrix(sources)
-        print('Fit Statistics For Losses:', self.millipede.FitStatistics(sources, response, params=None))
+        logger.info('Fit Statistics For Losses:', self.millipede.FitStatistics(sources, response, params=None))
         edeps = [p.energy for p in sources]
         responsemat = response.to_I3Matrix()
         expectations = numpy.inner(responsemat, edeps)
@@ -140,7 +131,7 @@ class Unfold(icetray.I3Module):
                     try:
                         thisexdomq.append(expectations[itera])
                     except:
-                        print('Problem extracting expected Q')
+                        logger.warning('Problem extracting expected Q')
                         pass
                     thisobdomq.append(thischarge)
                     cad = phys_services.I3Calculator.closest_approach_distance(
@@ -170,14 +161,6 @@ class Unfold(icetray.I3Module):
             expectedqtmp.append(thisexdomq)
             observedqtmp.append(thisobdomq)
             qtimebinstmp.append(timebins)
-            # print hitinfotmp[-1]
-            # print expectedqtmp[-1]
-            # print observedqtmp[-1]
-            # print qtimebinstmp[-1]
-        # hitinfo.append(hitinfotmp)
-        # expectedq.append(expectedqtmp)
-        # observedq.append(observedqtmp)
-        # qtimebins.append(qtimebinstmp)
         frame[self.fitname + '_' + self.input_loss_vect_name +
               '_cads'] = dataclasses.I3MapKeyDouble(caddict)
         frame[self.fitname + '_' + self.input_loss_vect_name +
@@ -189,11 +172,4 @@ class Unfold(icetray.I3Module):
         frame[self.fitname + '_' + self.input_loss_vect_name +
               '_TB'] = dataclasses.I3MapKeyVectorDouble(TBdict)
         self.PushFrame(frame)
-        print('Unfold done\n')
-
-# numpy.save(outfilebase+'_hitinfo.npy',hitinfo)
-# numpy.save(outfilebase+'_expectedq.npy',expectedq)
-# numpy.save(outfilebase+'_observedq.npy',observedq)
-# numpy.save(outfilebase+'_qtimebins.npy',qtimebins)
-# numpy.save(outfilebase+'_MCTree.npy',MCTreeData)
-
+        logger.info('Unfold done\n')

@@ -4,7 +4,7 @@ try:
 except ImportError:
     from functools32 import lru_cache
 from collections import namedtuple
-from common.calculator import vmf_stats, mean_ang, med_ang_res, sphe_to_kent, interval
+from common.calculator import mean_ang, med_ang_res, sphe_to_kent, interval
 import pandas as pd
 import numpy as np
 

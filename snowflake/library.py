@@ -2,11 +2,10 @@
 """
 import os
 import re
-import copy
 from collections import namedtuple, defaultdict
 from . import standalone
 from icecube.icetray import I3Tray, I3Units
-from icecube import icetray, dataclasses, simclasses, millipede, dataio
+from icecube import icetray, dataclasses, simclasses, dataio
 from icecube.hdfwriter import I3HDFWriter, I3SimHDFWriter
 from icecube.frame_object_diff import segments
 from icecube.BadDomList.BadDomListTraySegment import BadDomList
