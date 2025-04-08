@@ -50,7 +50,6 @@ class Unfold(icetray.I3Module):
             return True
 
         self.millipede = millipede.PyPyMillipede(self.context)
-        logger.info('Lets unfold the true losses')
         caddict = {}
         ObQtotdict = {}
         ObQdict = {}
@@ -68,7 +67,7 @@ class Unfold(icetray.I3Module):
         else:
             sources = frame[self.input_loss_vect_name]
         for s in sources:
-            logger.info(f'time: {s.time} energy: {s.energy}')
+            logger.debug(f'time: {s.time} energy: {s.energy}')
 
         # This line needs to call get_photonics not the service itself
         self.millipede.SetParameter('CascadePhotonicsService', self.cscd_service)
