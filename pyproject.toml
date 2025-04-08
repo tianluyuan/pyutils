@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pyutils_hep"
+dynamic = ["version"]
+authors = [
+  {name = "Tianlu Yuan", email = "tyuan@icecube.wisc.edu"},
+]
+description = "A package with useful python utilities for neutrino physics"
+readme = "README.md"
+license = {file = "LICENSE"}
+
+requires-python = ">= 3.8"
+dependencies = [
+  "numpy>=1.17",
+  "scipy",
+]
+
+classifiers = [
+  "Intended Audience :: Science/Research",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: English",
+  "Programming Language :: Python :: 3",
+  "Operating System :: MacOS :: MacOS X",
+  "Operating System :: POSIX :: Linux",
+  "Topic :: Scientific/Engineering",
+]
+
+[project.optional-dependencies]
+plotting = ["matplotlib"]
+
+[project.urls]
+Repository = "https://github.com/tianluyuan/pyutils"
+
+[tool.setuptools.packages.find]
+where = ["src/"]
+
+[tool.setuptools_scm]
