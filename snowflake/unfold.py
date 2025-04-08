@@ -68,7 +68,7 @@ class Unfold(icetray.I3Module):
         else:
             sources = frame[self.input_loss_vect_name]
         for s in sources:
-            logger.info('time:', s.time, 'energy:', s.energy)
+            logger.info(f'time: {s.time} energy: {s.energy}')
 
         # This line needs to call get_photonics not the service itself
         self.millipede.SetParameter('CascadePhotonicsService', self.cscd_service)
@@ -78,7 +78,7 @@ class Unfold(icetray.I3Module):
         self.millipede.SetParameter('BinSigma', self.bs)
         self.millipede.DatamapFromFrame(frame)
         response = self.millipede.GetResponseMatrix(sources)
-        logger.info('Fit Statistics For Losses:', self.millipede.FitStatistics(sources, response, params=None))
+        logger.info(f'Fit Statistics For Losses: {self.millipede.FitStatistics(sources, response, params=None)}')
         edeps = [p.energy for p in sources]
         responsemat = response.to_I3Matrix()
         expectations = numpy.inner(responsemat, edeps)
