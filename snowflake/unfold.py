@@ -45,7 +45,7 @@ class Unfold(icetray.I3Module):
 
     def Physics(self, frame):
         if not frame.Has(self.input_loss_vect_name):
-            logger.warning('no unfolding for {}'.format(self.input_loss_vect_name))
+            logger.warning(f'no unfolding for {self.input_loss_vect_name}')
             self.PushFrame(frame)
             return True
 

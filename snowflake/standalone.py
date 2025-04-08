@@ -32,6 +32,6 @@ def simple_hese_names(run_id, event_id):
         (121240,72944671):'Big Bird'	
     }
     try:
-        return '{} {} ({})'.format(run_id, event_id, names[(run_id, event_id)])
+        return f'{run_id} {event_id} ({names[run_id, event_id]})'
     except KeyError:
-        return '{} {}'.format(run_id, event_id)
+        return f'{run_id} {event_id}'

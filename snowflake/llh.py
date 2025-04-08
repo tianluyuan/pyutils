@@ -40,7 +40,7 @@ def qtots(dat):
                  dat.loc[dat['str']==s]['om'].unique()]
 
     return np.array(qtots)
-    
+
 
 def read_single(llhout, llhcut=np.inf, lpat=r'^[+0-9]'):
     """ Reads output file from llh and parses the useful bits into a pandas dataframe

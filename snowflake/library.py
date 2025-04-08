@@ -91,9 +91,8 @@ def print_event(particle, header):
     print(header)
     print(particle)
     print('------')
-    print('mjd = {:.2f}'.format(mjd))
-    print('dec, ra = {:.2f}, {:.2f}'.format(eqtr.dec/I3Units.deg,
-                                            eqtr.ra/I3Units.deg))
+    print(f'mjd = {mjd:.2f}')
+    print(f'dec, ra = {eqtr.dec / I3Units.deg:.2f}, {eqtr.ra / I3Units.deg:.2f}')
 
 
 def stringify(all_pulses, min_q=0):
@@ -212,7 +211,7 @@ def parse_input(inputfile, eventnum=None):
     m = re.match(r'.*([0-9]{6,8}).*', filename)
     runnum = m.group(1).lstrip('0')
     if eventnum is not None and eventnum > 0:
-        runnum += '_{}'.format(eventnum)
+        runnum += f'_{eventnum}'
     return runnum
 
 
