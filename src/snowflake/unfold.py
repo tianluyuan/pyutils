@@ -171,4 +171,4 @@ class Unfold(icetray.I3Module):
         frame[self.fitname + '_' + self.input_loss_vect_name +
               '_TB'] = dataclasses.I3MapKeyVectorDouble(TBdict)
         self.PushFrame(frame)
-        logger.info('Unfold done')
+        logger.info(f'Unfold done for run {I3EH.run_id} event {I3EH.event_id}')
