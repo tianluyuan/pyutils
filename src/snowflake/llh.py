@@ -11,17 +11,17 @@ import numpy as np
 
 def nice(icerec):
     """
-    Translates IceRec version strings to a standardized format.
+    Translates ice-model version strings to a standardized format.
 
     Parameters
     ----------
     icerec : str
-        The IceRec version string to be translated.
+        The ice-model version string to be translated.
 
     Returns
     -------
     str
-        The standardized IceRec version string.
+        The standardized ice-model version string.
     """
     translator = {'cxdx': '3.2+', 'latest-full': '3.2'}
     for icekey in translator:
@@ -31,19 +31,19 @@ def nice(icerec):
 
 def speclator(spec, icerec):
     """
-    Constructs a descriptive string based on the specifier and IceRec version.
+    Constructs a descriptive string based on the specifier and ice-model version.
 
     Parameters
     ----------
     spec : str
         Specification string to determine additional descriptions.
     icerec : str
-        The IceRec version string.
+        The ice-model version string.
 
     Returns
     -------
     str
-        A descriptive string combining IceRec version, mode, and additional info.
+        A descriptive string combining ice-model version, mode, and additional info.
     """
     nicerec = nice(icerec)
     wbr = 'w/brights' if 'qsat1000000' in spec else ''
