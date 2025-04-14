@@ -239,12 +239,12 @@ def hp_ticklabels(coord, zoom=False, lonra=None, latra=None, rot=None, poles=Tru
     pe = [path_effects.Stroke(linewidth=1.5, foreground='white'),
           path_effects.Normal()]
     for _ in zip(lats, llats):
-        hp.projtext(lon_offset, _[0], "{:.0f}$^\circ$".format(_[1]),
+        hp.projtext(lon_offset, _[0], f"{_[1]:.0f}$^\\circ$",
                     lonlat=True, path_effects=pe)
     if zoom:
         for _ in lons:
             hp.projtext(_, lat_offset,
-                        "{:.0f}$^\circ$".format(_), lonlat=True,
+                        f"{_:.0f}$^\\circ$", lonlat=True,
                         path_effects=pe)
     else:
         ax.annotate(r"$\bf{-180^\circ}$", xy=(1.7, 0.625), size="medium")

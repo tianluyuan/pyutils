@@ -166,7 +166,7 @@ def get_n_jobs(user='tianlu', state='a'):
     int
         The number of jobs.
     """
-    qstat = 'qstat -u {user} -s {state}'.format(user=user, state=state)
+    qstat = f'qstat -u {user} -s {state}'
 
     proc_stat = subprocess.Popen(shlex.split(qstat), stdout=subprocess.PIPE)
 
@@ -244,7 +244,7 @@ def prompt_yes_no(query):
     bool
         True if the user responds with 'yes', False otherwise.
     """
-    bool_str = input(query+' ')
+    bool_str = input(f"{query} ")
     if bool_str:
         resp = bool_str.capitalize()[0]
         if resp == 'Y':
@@ -306,7 +306,7 @@ def process_cmd(cmd, dry_run):
     tuple
         The output of the command, if executed.
     """
-    print(cmd+'\n')
+    print(f"{cmd}\n")
 
     if not dry_run:
         return subprocess.Popen(cmd, shell=True).communicate()
@@ -492,8 +492,7 @@ def timefn(fn, *args, **kwargs):
         start = time.clock()
         ret = fn(*args, **kwargs)
         end = time.clock()
-        print('Time elapsed for {0}: {1}'.format(fn.__name__,
-                                                 end - start))
+        print(f'Time elapsed for {fn.__name__}: {end - start}')
 
         return ret
     else:
