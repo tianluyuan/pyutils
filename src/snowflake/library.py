@@ -317,12 +317,29 @@ def ishadron(particle):
         ]
 
 
-def get_deposit_energy(mctree):
+def get_deposit_energy(mctree, tstop=np.inf):
+    r""" computes the true deposited EM-equivalent energy from the MCTree
+
+    Parameters
+    ----------
+    mctree : I3MCTree object
+        Contains the true particles produced during signal and background
+        generation.
+    tstop : float, (default np.inf) optional
+        Cut off time for inclusion in the calculation. Can be used to compute
+        the deposited energy up to e.g. tau decay.
+
+    Returns
+    -------
+    float
+        Sum over all EM-equivalent, InIce, non-Dark energy losses
+    """
     losses = 0
     for p in mctree:
         if not p.is_cascade: continue
         if not p.location_type == dataclasses.I3Particle.InIce: continue
         if p.shape == p.Dark: continue
+        if p.time > tstop: continue
         losses += ShowerParameters(p.type, p.energy).emScale * p.energy
 
     return losses
