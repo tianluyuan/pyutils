@@ -10,14 +10,41 @@ import numpy as np
 
 
 def nice(icerec):
-    translator = {'cxdx':'3.2+',
-                  'latest-full':'3.2'}
+    """
+    Translates IceRec version strings to a standardized format.
+
+    Parameters
+    ----------
+    icerec : str
+        The IceRec version string to be translated.
+
+    Returns
+    -------
+    str
+        The standardized IceRec version string.
+    """
+    translator = {'cxdx': '3.2+', 'latest-full': '3.2'}
     for icekey in translator:
         icerec = icerec.replace(icekey, translator[icekey])
     return icerec
 
 
 def speclator(spec, icerec):
+    """
+    Constructs a descriptive string based on the specifier and IceRec version.
+
+    Parameters
+    ----------
+    spec : str
+        Specification string to determine additional descriptions.
+    icerec : str
+        The IceRec version string.
+
+    Returns
+    -------
+    str
+        A descriptive string combining IceRec version, mode, and additional info.
+    """
     nicerec = nice(icerec)
     wbr = 'w/brights' if 'qsat1000000' in spec else ''
     mlp = 'track' if 'mlpd1' in spec else 'cascade'
@@ -26,28 +53,50 @@ def speclator(spec, icerec):
 
 @lru_cache(1024)
 def qtots(dat):
-    """ returns dom-by-dom charge on ppc simulated hit files
+    """
+    Computes the total charge per DOM for PPC simulated hit files.
+
+    Parameters
+    ----------
+    dat : str or DataFrame
+        Input data file or DataFrame containing DOM simulation data.
+
+    Returns
+    -------
+    numpy.ndarray
+        Array of total charges per DOM.
     """
     if os.path.splitext(dat)[-1] == '.csv':
         dat = pd.read_csv(dat, index_col=0)
-        qtots = [len(dat.loc[(dat['str']==s) & (dat['om'] == om)]) for s
+        qtots = [len(dat.loc[(dat['str'] == s) & (dat['om'] == om)]) for s
                  in dat['str'].unique() for om in
-                 dat.loc[dat['str']==s]['om'].unique()]
+                 dat.loc[dat['str'] == s]['om'].unique()]
     else:
         dat = pd.read_csv(dat, sep=' ', header=None, names=('str', 'om', 'time', 'charge'))
-        qtots = [dat.loc[(dat['str']==s) & (dat['om'] == om)]['charge'].sum() for s
+        qtots = [dat.loc[(dat['str'] == s) & (dat['om'] == om)]['charge'].sum() for s
                  in dat['str'].unique() for om in
-                 dat.loc[dat['str']==s]['om'].unique()]
+                 dat.loc[dat['str'] == s]['om'].unique()]
 
     return np.array(qtots)
 
 
 def read_single(llhout, llhcut=np.inf, lpat=r'^[+0-9]'):
-    """ Reads output file from llh and parses the useful bits into a pandas dataframe
+    """
+    Reads and parses a single LLH output file into a pandas DataFrame.
 
-    *llhout* is the output file from llh 10 or llh 16
-    *llhcut* is the maximum llh to allow
-    *lpat* is the regex pattern to match '+/-[0-9]'
+    Parameters
+    ----------
+    llhout : str
+        Filepath to the LLH output file.
+    llhcut : float, optional
+        Maximum allowed LLH value (default is infinity).
+    lpat : str, optional
+        Regular expression pattern to match LLH lines (default is '^[+0-9]').
+
+    Returns
+    -------
+    pandas.DataFrame
+        Parsed LLH data as a DataFrame.
     """
     def parse_losses(vect):
         """ parse energy loss vector, for cascades it's 1.0.
@@ -74,6 +123,23 @@ def read_single(llhout, llhcut=np.inf, lpat=r'^[+0-9]'):
 
 
 def read(llhouts, llhcut=np.inf, lpat=r'^[+0-9]'):
+    """
+    Reads and parses one or more LLH output files into a pandas DataFrame.
+
+    Parameters
+    ----------
+    llhouts : str or list of str
+        Filepath(s) to the LLH output file(s).
+    llhcut : float, optional
+        Maximum allowed LLH value (default is infinity).
+    lpat : str, optional
+        Regular expression pattern to match LLH lines (default is '^[+0-9]').
+
+    Returns
+    -------
+    pandas.DataFrame
+        Concatenated parsed LLH data as a DataFrame.
+    """
     if isinstance(llhouts, str):
         return read_single(llhouts, llhcut, lpat)
     else:
@@ -81,25 +147,32 @@ def read(llhouts, llhcut=np.inf, lpat=r'^[+0-9]'):
 
 
 def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]', mlpd_npad=12):
-    """ returns stats based on llh output
+    """
+    Computes statistics from LLH output data.
 
-    *llhchoice* can be
-    'min' returns the absolute best fit... in this case there are no errors
-    'cut' uses fits with rlogl<llhcut
-    'last' uses last 5% of steps
-    'all' uses all steps
-    'minlast' uses min rlogl half of last 10% of steps. used in llh.cxx
-    'llhout' same as 'minlast' but returns the absolute best fit instead of mean
+    Parameters
+    ----------
+    finput : str or list of str
+        Input file or list of files containing LLH data.
+    llhchoice : str, optional
+        Method for selecting LLH steps. Options are 'min', 'cut', 'last', 
+        'all', 'minlast', or 'llhout' (default is 'minlast').
+    llhcut : float, optional
+        Maximum allowed LLH value (default is infinity).
+    lpat : str, optional
+        Regular expression pattern to match LLH lines (default is '^[+0-9]').
+    mlpd_npad : int, optional
+        Number of steps to exclude in MLPD calculations (default is 12).
 
-    *mlpd_npad* sets the number of 7.5m steps to exclude in the first and last part of
-    MLPD=1. This reduces contributions to the energy reconstruction from large stochastics
-    fitted outside of the detector.
+    Returns
+    -------
+    namedtuple
+        Contains centers, errors, and intervals based on LLH data.
     """
     Centers = namedtuple('Centers', 'rlogl x y z zenith azimuth e t')
     Errors = namedtuple('Errors', 'dl dx dy dz dr dA de dt N Dxyz')
     Intervals = namedtuple('Intervals', 'elow emode ehigh')
     dl = dx = dy = dz = dr = de = dt = dA = Dxyz = 0
-    kappa = np.inf
     fn_npad = lambda frs: np.sum(frs[mlpd_npad:-mlpd_npad]) if isinstance(frs, np.ndarray) else 1
     if llhchoice == 'min':
         llhsteps = read(finput, llhcut, lpat)
@@ -145,8 +218,26 @@ def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]', mlpd_
 
 
 def fb8(finput, llhcut=np.inf, lpat=r'^[+0-9]', verbose=False, fb5_only=False):
-    """ Read finput and fit points to fb8 distribution using 
-    https://github.com/tianluyuan/sphere
+    """
+    Fits points to an FB8 distribution using the sphere library.
+
+    Parameters
+    ----------
+    finput : str
+        Input file containing LLH data.
+    llhcut : float, optional
+        Maximum allowed LLH value (default is infinity).
+    lpat : str, optional
+        Regular expression pattern to match LLH lines (default is '^[+0-9]').
+    verbose : bool, optional
+        Whether to enable verbose output (default is False).
+    fb5_only : bool, optional
+        Whether to use only FB5 distribution (default is False).
+
+    Returns
+    -------
+    dict or None
+        FB8 distribution parameters or None if no data is available.
     """
     from sphere import distribution as sd
     llhsteps = read(finput, llhcut, lpat)
