@@ -129,6 +129,11 @@ def restrict_axes(ax, xlim=None, ylim=None):
     """
     Restrict axis limits to specified bounds.
 
+    Given a matplotlib axis *ax*, restricts the axis limits to xlim and
+    ylim if they exceed the bounds (xlim, ylim). If the axis limit
+    does not overlap with (xlim, ylim), the new limits are set to
+    (xlim, ylim). Otherwise limits are kept as is.
+
     Parameters
     ----------
     ax : matplotlib.axes.Axes
@@ -147,6 +152,9 @@ def restrict_axes(ax, xlim=None, ylim=None):
 def contour_levels(x, y, cls=(0.95, 0.68), bins=None):
     """
     Calculate contour levels corresponding to confidence levels.
+
+    Given 2D datapoints, return values of the pdf corresponding to the
+    passed confidence levels.
 
     Parameters
     ----------

@@ -84,6 +84,10 @@ def excluded_doms(frame, exclude_list, keep_partial=True):
     """
     Returns a list of excluded DOMs for the current frame based on the exclude list.
 
+    Returns a list of excluded doms for the current frame based on the exclude_list.
+    Partially excluded DOMs are kept by default but if 'keep_partial' is flagged as
+    False then those DOMs will be excluded as well.
+
     Parameters
     ----------
     frame : I3Frame
@@ -239,7 +243,7 @@ def hdfwriter(inp, out, subeventstreams=None, keys=None, types=None, fn=None):
 
 def simhdfwriter(inp, out, runnumber=0, subeventstreams=None, keys=None, types=None):
     """
-    Writes simulation Q-frames into an HDF5 file without event headers.
+    Writes simulation Q-frames without event headers into an HDF5 file.
 
     Parameters
     ----------
@@ -350,6 +354,10 @@ def hese_names(run_id, event_id=None):
     -------
     str
         Human-readable HESE name.
+
+    Reference
+    ---------
+    Based on a file from C. Kopper
     """
     if isinstance(run_id, dataclasses.I3EventHeader):
         event_id = run_id.event_id
@@ -440,35 +448,6 @@ class RemoveBrokenEvents(icetray.I3ConditionalModule):
         self.PushFrame(fr)
 
 
-
-def get_deposit_energy(mctree, tstop=np.inf):
-    r""" computes the true deposited EM-equivalent energy from the MCTree
-
-    Parameters
-    ----------
-    mctree : I3MCTree object
-        Contains the true particles produced during signal and background
-        generation.
-    tstop : float, (default np.inf) optional
-        Cut off time for inclusion in the calculation. Can be used to compute
-        the deposited energy up to e.g. tau decay.
-
-    Returns
-    -------
-    float
-        Sum over all EM-equivalent, InIce, non-Dark energy losses
-    """
-    losses = 0
-    for p in mctree:
-        if not p.is_cascade: continue
-        if not p.location_type == dataclasses.I3Particle.InIce: continue
-        if p.shape == p.Dark: continue
-        if p.time > tstop: continue
-        losses += ShowerParameters(p.type, p.energy).emScale * p.energy
-
-    return losses
-
-
 def isem(particle):
     """
     Checks if a particle is an electromagnetic (EM) particle.
@@ -490,7 +469,7 @@ def isem(particle):
         dataclasses.I3Particle.ParticleType.DeltaE,
         dataclasses.I3Particle.ParticleType.PairProd,
         dataclasses.I3Particle.ParticleType.Gamma,
-        dataclasses.I3Particle.ParticleType.Pi0,
+        dataclasses.I3Particle.ParticleType.Pi0,  # Pi0 decays to 2 gammas and produce EM showers
     ]
 
 
@@ -550,9 +529,37 @@ def ishadron(particle):
     ]
 
 
+def get_deposit_energy(mctree, tstop=np.inf):
+    r""" computes the true deposited EM-equivalent energy from the MCTree
+
+    Parameters
+    ----------
+    mctree : I3MCTree object
+        Contains the true particles produced during signal and background
+        generation.
+    tstop : float, (default np.inf) optional
+        Cut off time for inclusion in the calculation. Can be used to compute
+        the deposited energy up to e.g. tau decay.
+
+    Returns
+    -------
+    float
+        Sum over all EM-equivalent, InIce, non-Dark energy losses
+    """
+    losses = 0
+    for p in mctree:
+        if not p.is_cascade: continue
+        if not p.location_type == dataclasses.I3Particle.InIce: continue
+        if p.shape == p.Dark: continue
+        if p.time > tstop: continue
+        losses += ShowerParameters(p.type, p.energy).emScale * p.energy
+
+    return losses
+
+
 def rebuild_gcd(gcddiff, gcdout='GCD.i3.zst', runid=0, issim=False, writeqp=False):
     """
-    Rebuilds GCD (Geometry, Calibration, and DetectorStatus) files from differences.
+    Rebuilds GCD (Geometry, Calibration, and DetectorStatus) file from GCDDiff file.
 
     Parameters
     ----------
@@ -654,7 +661,7 @@ def splitP(infile, outdir, subeventstreams=None, append_fname=False):
 
 def refine_vertex_time(vertex, time, direction, pulses, omgeo):
     """
-    Refines the vertex time based on the closest approach of pulses.
+    Refines the vertex time based on the closest approach distance.
 
     Parameters
     ----------

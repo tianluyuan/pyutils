@@ -150,6 +150,14 @@ def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]', mlpd_
     """
     Computes statistics from LLH output data.
 
+    Parameter *llhchoice* can be
+    'min': returns the absolute best fit... in this case there are no errors
+    'cut': uses fits with rlogl<llhcut
+    'last': uses last 5% of steps
+    'all': uses all steps
+    'minlast': uses min rlogl half of last 10% of steps. used in llh.cxx
+    'llhout': same as 'minlast' but returns the absolute best fit instead of mean
+
     Parameters
     ----------
     finput : str or list of str
@@ -162,7 +170,9 @@ def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]', mlpd_
     lpat : str, optional
         Regular expression pattern to match LLH lines (default is '^[+0-9]').
     mlpd_npad : int, optional
-        Number of steps to exclude in MLPD calculations (default is 12).
+        Number of 7.5m steps to exclude in the first and last part of MLPD=1
+        reconstructions. This reduces contributions to the energy reconstruction
+        from large stochastics fitted outside of the detector (default is 12).
 
     Returns
     -------
@@ -219,7 +229,7 @@ def llh_stats(finput, llhchoice='minlast', llhcut=np.inf, lpat=r'^[+0-9]', mlpd_
 
 def fb8(finput, llhcut=np.inf, lpat=r'^[+0-9]', verbose=False, fb5_only=False):
     """
-    Fits points to an FB8 distribution using the sphere library.
+    Fits points to an FB8 distribution using the fb8 package.
 
     Parameters
     ----------

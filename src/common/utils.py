@@ -108,6 +108,26 @@ def make_dirs_if_needed(dir_path):
         os.makedirs(dir_path)
 
 
+def make_lfcdirs_if_needed(lfn_dir):
+    """
+    Create a logical file catalog (LFC) directory if it does not already exist.
+
+    Parameters
+    ----------
+    lfn_dir : str
+        Path to the logical file catalog directory.
+
+    Returns
+    -------
+    None
+    """
+    lfc_ls = subprocess.Popen(['lfc-ls', lfn_dir])
+    lfc_ls.communicate()
+    if lfc_ls.returncode == 1:
+        print('making directory:', lfn_dir)
+        subprocess.Popen(['lfc-mkdir', '-p', lfn_dir]).communicate()
+
+
 def chunk(l, n):
     """
     Split a list into smaller chunks of a specified size.
@@ -130,119 +150,6 @@ def chunk(l, n):
     return [l[i:i+n] for i in range(0, len(l), n)]
 
 
-def process_cmd(cmd, dry_run):
-    """
-    Execute a shell command.
-
-    Parameters
-    ----------
-    cmd : str
-        The command to execute.
-    dry_run : bool
-        If True, the command is not executed.
-
-    Returns
-    -------
-    tuple
-        The output of the command, if executed.
-    """
-    print(cmd+'\n')
-
-    if not dry_run:
-        return subprocess.Popen(cmd, shell=True).communicate()
-
-    print('=====================================================')
-
-
-def process_cmd_star(cmd_tup):
-    """
-    Convert `f([1,2])` to `f(1,2)` call for multiprocessing Pool.
-
-    Reference:
-    http://stackoverflow.com/questions/5442910/python-multiprocessing-pool-map-for-multiple-arguments
-
-    Parameters
-    ----------
-    cmd_tup : tuple
-        Command and arguments to execute.
-
-    Returns
-    -------
-    tuple
-        The output of the command, if executed.
-    """
-    return process_cmd(*cmd_tup)
-
-
-def split_path(p):
-    """
-    Split a file path into its components.
-
-    Reference:
-    http://stackoverflow.com/questions/3167154/how-to-split-a-dos-path-into-its-components-in-python
-
-    Parameters
-    ----------
-    p : str
-        The file path to split.
-
-    Returns
-    -------
-    list of str
-        List of path components.
-    """
-    a, b = os.path.split(os.path.normpath(p))
-    return (split_path(a) if len(a) and len(b) else []) + [b]
-
-
-def pool_wrapper(func, iterprocs, nprocs=None, chunksize=1):
-    """
-    Submit multithreaded jobs to a multiprocessing pool.
-
-    Reference:
-    http://bugs.python.org/issue6433
-
-    Parameters
-    ----------
-    func : callable
-        The function to execute.
-    iterprocs : iterable
-        Iterable of processes to run.
-    nprocs : int, optional
-        Number of processes in the pool. Default is None.
-    chunksize : int, optional
-        Number of tasks to assign to each worker. Default is 1.
-
-    Returns
-    -------
-    None
-    """
-    listprocs = list(iterprocs)
-    if len(listprocs) > 0:
-        proc_pool = mp.Pool(nprocs)
-        proc_pool.map(func, listprocs, chunksize)
-        proc_pool.close()
-        proc_pool.join()
-
-
-def get_cwd():
-    """
-    Get the current working directory, handling edge cases for automounted paths.
-
-    Reference:
-    SL5/SL6 mixed environment paths, where paths beginning with /amd/... may cause issues 
-    due to SL6's autofs.
-
-    Returns
-    -------
-    str
-        The current working directory.
-    """
-    return (subprocess.getoutput('pawd')
-            if not subprocess.getstatusoutput('pawd')[0]  # 0 on success
-            else os.getcwd())
-
-
 def get_n_jobs(user='tianlu', state='a'):
     """
     Get the number of jobs running for a given user and state.
@@ -263,6 +170,8 @@ def get_n_jobs(user='tianlu', state='a'):
 
     proc_stat = subprocess.Popen(shlex.split(qstat), stdout=subprocess.PIPE)
 
+    # grep user so that we ignore the first two lines outputted by qstat
+    # when counting with 'wc -l'
     proc_grep = subprocess.Popen(['grep', user],
                                  stdin=proc_stat.stdout,
                                  stdout=subprocess.PIPE)
@@ -379,6 +288,120 @@ def almost_equal_relative_and_abs(a, b, max_diff=sys.float_info.epsilon, max_rel
         return True
 
     return False
+
+
+def process_cmd(cmd, dry_run):
+    """
+    Execute a shell command.
+
+    Parameters
+    ----------
+    cmd : str
+        The command to execute.
+    dry_run : bool
+        If True, the command is not executed.
+
+    Returns
+    -------
+    tuple
+        The output of the command, if executed.
+    """
+    print(cmd+'\n')
+
+    if not dry_run:
+        return subprocess.Popen(cmd, shell=True).communicate()
+
+    print('=====================================================')
+
+
+def process_cmd_star(cmd_tup):
+    """
+    Convert `f([1,2])` to `f(1,2)` call for multiprocessing Pool.
+
+    Reference:
+    http://stackoverflow.com/questions/5442910/python-multiprocessing-pool-map-for-multiple-arguments
+
+    Parameters
+    ----------
+    cmd_tup : tuple
+        Command and arguments to execute.
+
+    Returns
+    -------
+    tuple
+        The output of the command, if executed.
+    """
+    return process_cmd(*cmd_tup)
+
+
+def pool_wrapper(func, iterprocs, nprocs=None, chunksize=1):
+    """
+    Submit multithreaded jobs to a multiprocessing pool.
+
+    Reference:
+    http://bugs.python.org/issue6433
+
+    Parameters
+    ----------
+    func : callable
+        The function to execute.
+    iterprocs : iterable
+        Iterable of processes to run.
+    nprocs : int, optional
+        Number of processes in the pool. Default is None.
+    chunksize : int, optional
+        Number of tasks to assign to each worker. Default is 1.
+
+    Returns
+    -------
+    None
+    """
+    listprocs = list(iterprocs)
+    if len(listprocs) > 0:
+        proc_pool = mp.Pool(nprocs)
+        proc_pool.map(func, listprocs, chunksize)
+        proc_pool.close()
+        proc_pool.join()
+
+
+def split_path(p):
+    """
+    Split a file path into its components.
+
+    Parameters
+    ----------
+    p : str
+        The file path to split.
+
+    Returns
+    -------
+    list of str
+        List of path components.
+
+    Reference
+    ---------
+    http://stackoverflow.com/questions/3167154/how-to-split-a-dos-path-into-its-components-in-python
+    """
+    a, b = os.path.split(os.path.normpath(p))
+    return (split_path(a) if len(a) and len(b) else []) + [b]
+
+
+def get_cwd():
+    """
+    Get the current working directory, handling edge cases for automounted paths.
+
+    Reference:
+    SL5/SL6 mixed environment paths, where paths beginning with /amd/... may cause issues 
+    due to SL6's autofs.
+
+    Returns
+    -------
+    str
+        The current working directory.
+    """
+    return (subprocess.getoutput('pawd')
+            if not subprocess.getstatusoutput('pawd')[0]  # 0 on success
+            else os.getcwd())
 
 
 def glob_newest(match_str):
