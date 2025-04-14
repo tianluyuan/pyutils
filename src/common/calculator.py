@@ -2,10 +2,6 @@ import numpy as np
 from scipy.stats import gamma
 
 
-import numpy as np
-from scipy.stats import gamma
-
-
 def centers(x):
     """
     Compute the centers of the bins based on the input edges.
