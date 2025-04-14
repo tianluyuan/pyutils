@@ -79,8 +79,8 @@ class Efficiency:
                                 binning)
         self.h_denom.Sumw2()
 
-        num_chain.Draw(var+">>h_numer", num_tup.cut)
-        denom_chain.Draw(var+">>h_denom", denom_tup.cut)
+        num_chain.Draw(f"{var}>>h_numer", num_tup.cut)
+        denom_chain.Draw(f"{var}>>h_denom", denom_tup.cut)
 
         self.efficiency = rt.TEfficiency(self.h_numer, self.h_denom)
         rt.SetOwnership(self.efficiency, 0)
@@ -89,9 +89,7 @@ class Efficiency:
         # this should but doesn't set the axes in ROOT 5.34/09
         # frac = '{0}/{1}'.format(num_tup.name, denom_tup.name)
         frac = 'Fraction'
-        etitle = '{0};{1};{2}'.format(num_tup.name,
-                                      var.replace(':', ';'),
-                                      frac)
+        etitle = f"{num_tup.name};{var.replace(':', ';')};{frac}"
         self.efficiency.SetTitle(etitle)
 
 
@@ -463,11 +461,9 @@ def get_branch_ctype(branch):
         if len(branch_split) > 1:
             return branch_split[1]
         else:
-            raise RuntimeError('Branch "{0}" has no ctype!'.
-                               format(branch.GetName()))
+            raise RuntimeError(f'Branch "{branch.GetName()}" has no ctype!')
     else:
-        raise TypeError('Branch "{0}" is not of type "TBranch".'.
-                        format(branch.GetName()))
+        raise TypeError(f'Branch "{branch.GetName()}" is not of type "TBranch".')
 
 
 
@@ -569,7 +565,7 @@ def atomZ_sel_str(pdg_var):
 
     pdg_var: string representing the true-pdg variable in the TTree
     """
-    return '{0}/10000 % 1000'.format(pdg_var)
+    return f'{pdg_var}/10000 % 1000'
 
 
 def title(draw_func):
@@ -779,9 +775,7 @@ def flatten_branch(orig_tree, branch_descriptor, branch_sel='*', sel=''):
 
         out_txt.close()
 
-    branch_descriptor = '{0}{1}{2}'.format('orig_row/I:',
-                                           instance_descriptor,
-                                           branch_descriptor)
+    branch_descriptor = f'orig_row/I:{instance_descriptor}{branch_descriptor}'
     new_tree = rt.TTree('new_tree', 'new tree')
     new_tree.ReadFile(txt_out, branch_descriptor,)
 
@@ -795,13 +789,13 @@ def area_width_normalized_label(var, area_norm=True, width_norm=True):
     area/width. For both area and width, the label should be 1/N*dN/d(var).
     """
     if area_norm and width_norm:
-        return '#frac{dN}{Nd('+var+')}'
+        return f"#frac{{dN}}{{Nd({var})}}"
     elif area_norm:
-        return '#frac{#Delta('+var+')dN}{Nd('+var+')}'
+        return f"#frac{{#Delta({var})dN}}{{Nd({var})}}"
     elif width_norm:
-        return '#frac{dN}{d('+var+')}'
+        return f"#frac{{dN}}{{d({var})}}"
     else:
-        return '#frac{#Delta('+var+')dN}{d('+var+')}'
+        return f"#frac{{#Delta({var})dN}}{{d({var})}}"
 
 
 def escape_for_filename(rootstr):
@@ -1037,13 +1031,13 @@ def hist_to_formula(hist, var, sel='1'):
         up = xaxis.GetBinUpEdge(b)
         w = hist.GetBinContent(b)
         if b==0:
-            bin_formulas.append('{0}*({1} < {2})'.format(w, var, up))
+            bin_formulas.append(f'{w}*({var} < {up})')
         elif b==hist.GetNbinsX()+1:
-            bin_formulas.append('{0}*({1} >= {2})'.format(w, var, low))
+            bin_formulas.append(f'{w}*({var} >= {low})')
         else:
-            bin_formulas.append('{0}*({1} >= {2} && {1} < {3})'.format(w, var, low, up))
+            bin_formulas.append(f'{w}*({var} >= {low} && {var} < {up})')
 
-    return '(({0})*({1})+1*!({0}))'.format(sel, '+'.join(bin_formulas))
+    return f"(({sel})*({'+'.join(bin_formulas)})+1*!({sel}))"
 
 
 def contents(hist):
@@ -1099,9 +1093,7 @@ def chi2test(hobs, hexp, opts=''):
     pval = rt.TMath.Prob(chi2, ndof)
 
     if 'p' in opts.lower():
-        print('INFO: Chi2 = {0}, Prob = {1}, NDF = {2}'.format(chi2,
-                                                               pval,
-                                                               ndof))
+        print(f'INFO: Chi2 = {chi2}, Prob = {pval}, NDF = {ndof}')
 
     if 'chi2/ndf' in opts.lower():
         return chi2/ndof

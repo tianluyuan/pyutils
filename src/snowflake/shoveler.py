@@ -3,6 +3,7 @@
 from I3Tray import I3Units
 from icecube import dataclasses
 
+
 def cascade_reshape(cascade):
     """ A cascade will by default be rendered as a sphere. This gives it a direction and speed.
     """
