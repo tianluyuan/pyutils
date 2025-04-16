@@ -2,8 +2,6 @@ from icecube import icetray, dataclasses, millipede
 from icecube import phys_services
 import numpy
 from snowflake import library
-import logging
-logger = logging.getLogger(__name__)
 
 
 class Unfold(icetray.I3Module):
@@ -45,7 +43,8 @@ class Unfold(icetray.I3Module):
 
     def Physics(self, frame):
         if not frame.Has(self.input_loss_vect_name):
-            logger.warning(f'no unfolding for {self.input_loss_vect_name}')
+            icetray.logging.log_warn(f'no unfolding for {self.input_loss_vect_name}',
+                                     __name__)
             self.PushFrame(frame)
             return True
 
@@ -67,7 +66,8 @@ class Unfold(icetray.I3Module):
         else:
             sources = frame[self.input_loss_vect_name]
         for s in sources:
-            logger.debug(f'time: {s.time} energy: {s.energy}')
+            icetray.logging.debug(f'time: {s.time} energy: {s.energy}',
+                                  __name__)
 
         # This line needs to call get_photonics not the service itself
         self.millipede.SetParameter('CascadePhotonicsService', self.cscd_service)
@@ -77,7 +77,9 @@ class Unfold(icetray.I3Module):
         self.millipede.SetParameter('BinSigma', self.bs)
         self.millipede.DatamapFromFrame(frame)
         response = self.millipede.GetResponseMatrix(sources)
-        logger.info(f'Fit Statistics For Losses: {self.millipede.FitStatistics(sources, response, params=None)}')
+        icetray.logging.log_info(
+            f'Fit Statistics For Losses: {self.millipede.FitStatistics(sources, response, params=None)}',
+            __name__)
         edeps = [p.energy for p in sources]
         responsemat = response.to_I3Matrix()
         expectations = numpy.inner(responsemat, edeps)
@@ -130,7 +132,8 @@ class Unfold(icetray.I3Module):
                     try:
                         thisexdomq.append(expectations[itera])
                     except:
-                        logger.warning('Problem extracting expected Q')
+                        icetray.logging.log_warn('Problem extracting expected Q',
+                                                 __name__)
                         pass
                     thisobdomq.append(thischarge)
                     cad = phys_services.I3Calculator.closest_approach_distance(
@@ -171,4 +174,6 @@ class Unfold(icetray.I3Module):
         frame[self.fitname + '_' + self.input_loss_vect_name +
               '_TB'] = dataclasses.I3MapKeyVectorDouble(TBdict)
         self.PushFrame(frame)
-        logger.info(f'Unfold done for run {I3EH.run_id} event {I3EH.event_id}')
+        icetray.logging.log_info(
+            f'Unfold done for run {I3EH.run_id} event {I3EH.event_id}',
+            __name__)
