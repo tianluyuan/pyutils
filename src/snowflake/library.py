@@ -678,6 +678,8 @@ def refine_vertex_time(vertex, time, direction, pulses, omgeo):
     for om in pulses.keys():
         rvec = omgeo[om].position-vertex
         _l = -rvec*direction
+        if _l > 0.:  # only look ahead from vertex
+            continue
         _d = np.sqrt(rvec.mag2-_l**2) # closest approach distance
         if _d < min_d: # closest om
             min_d = _d
