@@ -66,8 +66,8 @@ class Unfold(icetray.I3Module):
         else:
             sources = frame[self.input_loss_vect_name]
         for s in sources:
-            icetray.logging.debug(f'time: {s.time} energy: {s.energy}',
-                                  __name__)
+            icetray.logging.log_debug(f'time: {s.time} energy: {s.energy}',
+                                      __name__)
 
         # This line needs to call get_photonics not the service itself
         self.millipede.SetParameter('CascadePhotonicsService', self.cscd_service)
