@@ -105,11 +105,11 @@ def excluded_doms(frame, exclude_list, keep_partial=True):
     excluded = []
     for category in exclude_list:
         if frame.Has(category):
+            if keep_partial and isinstance(frame[category], dataclasses.I3TimeWindowSeriesMap):
+                continue
             for k in frame[category]:
                 if isinstance(k, icetray.OMKey):
                     excluded.append(k)
-                elif not keep_partial and isinstance(k[0], icetray.OMKey):
-                    excluded.append(k[0])
 
     return excluded
 
