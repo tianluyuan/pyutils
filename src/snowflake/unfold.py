@@ -29,6 +29,9 @@ class Unfold(icetray.I3Module):
         self.AddParameter('BinSigma',
                           'Bayesian blocking sigma',
                           0)
+        self.AddParameter('MinTimeWidth',
+                          'Minimum time width for binning',
+                          8)
 
         self.AddOutBox('OutBox')
 
@@ -40,6 +43,7 @@ class Unfold(icetray.I3Module):
         self.exclude_doms = self.GetParameter('ExcludedDOMs')
         self.ppb = self.GetParameter('PhotonsPerBin')
         self.bs = self.GetParameter('BinSigma')
+        self.mtw = self.GetParameter('MinTimeWidth')
 
     def Physics(self, frame):
         if not frame.Has(self.input_loss_vect_name):
@@ -75,6 +79,7 @@ class Unfold(icetray.I3Module):
         self.millipede.SetParameter('Pulses', self.pulses)
         self.millipede.SetParameter('PhotonsPerBin', self.ppb)
         self.millipede.SetParameter('BinSigma', self.bs)
+        self.millipede.SetParameter('MinTimeWidth', self.mtw)
         self.millipede.DatamapFromFrame(frame)
         response = self.millipede.GetResponseMatrix(sources)
         icetray.logging.log_info(
