@@ -106,11 +106,23 @@ def read_single(llhout, llhcut=np.inf, lpat=r'^[+0-9]'):
         else:
             return vect
 
-    llhdat = pd.read_csv(llhout, delim_whitespace=True, header=None,
+    def to_numeric_safe(s):
+        """
+        Converts a pandas Series element to numeric if possible,
+        otherwise returns the original element.
+        """
+        try:
+            # Attempt conversion with default errors='raise'
+            return pd.to_numeric(s, errors='raise')
+        except ValueError:
+            # If conversion fails, return the original Series/element
+            return s
+
+    llhdat = pd.read_csv(llhout, sep='\s+', header=None,
                          names='l rlogl x y z zenith azimuth e t a b'.split(),
                          usecols=lambda x: x[0] in 'lrxyzaetb', engine='python')
     select = llhdat['l'].str.match(lpat)
-    llhdat = llhdat.loc[select].apply(pd.to_numeric, errors='ignore')
+    llhdat = llhdat.loc[select].apply(to_numeric_safe)
     lssdat = pd.read_csv(llhout, delimiter=':', header=None,
                          names='ll losses'.split(), usecols=lambda x: x[0] == 'l')
     lssdat = lssdat.loc[(lssdat['ll'] == 'E') & np.roll(select, -2)]
