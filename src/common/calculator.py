@@ -174,7 +174,7 @@ def center_angle(theta0, phi0, theta1, phi1):
     pos1 = sphe_to_cart(1, theta0, phi0)
     pos2 = sphe_to_cart(1, theta1, phi1)
     dotp = np.sum(np.asarray(pos1).T * np.asarray(pos2).T, axis=-1)
-    return np.asfarray(np.arccos(np.clip(dotp, -1, 1)))
+    return np.asarray(np.arccos(np.clip(dotp, -1, 1)), dtype=np.float64)
 
 
 def vmf_stats(thetas, phis, p=3):
