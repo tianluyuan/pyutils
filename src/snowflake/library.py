@@ -241,7 +241,7 @@ def hdfwriter(inp, out, subeventstreams=None, keys=None, types=None, fn=None):
     tray.Finish()
 
 
-def simhdfwriter(inp, out, runnumber=0, subeventstreams=None, keys=None, types=None):
+def simhdfwriter(inp, out, runnumber=0, keys=None, types=None):
     """
     Writes simulation Q-frames without event headers into an HDF5 file.
 
@@ -253,8 +253,6 @@ def simhdfwriter(inp, out, runnumber=0, subeventstreams=None, keys=None, types=N
         Output HDF5 file path.
     runnumber : int, optional
         Run number to include in the output. Default is 0.
-    subeventstreams : list, optional
-        Sub-event streams to include in the HDF5 file.
     keys : list, optional
         Specific keys to include in the HDF5 file.
     types : list, optional
@@ -383,7 +381,7 @@ def parse_input(inputfile, eventnum=None):
     """
     filename = os.path.basename(inputfile)
     m = re.match(r'.*([0-9]{6,8}).*', filename)
-    runnum = m.group(1).lstrip('0')
+    runnum = m.group(1).lstrip('0') if m is not None else 'nan'
     if eventnum is not None and eventnum > 0:
         runnum += f'_{eventnum}'
     return runnum
