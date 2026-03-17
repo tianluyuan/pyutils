@@ -19,7 +19,7 @@ import os
 import glob
 import marshal
 import time
-from numpy import math
+import math
 from tianlu import directories, rootutils
 from tianlu.analysis import utils, P0DCutUtils
 from exceptions import AttributeError

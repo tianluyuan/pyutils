@@ -175,7 +175,7 @@ def contour_levels(x, y, cls=(0.95, 0.68), bins=None):
     if bins is None:
         bins = int(np.sqrt(len(x)))
     # Make a 2D normalized histogram
-    H, xedges, yedges = np.histogram2d(x, y, bins=bins, normed=True)
+    H, xedges, yedges = np.histogram2d(x, y, bins=bins, density=True)
 
     norm = H.sum()  # Find the norm of the sum
 
