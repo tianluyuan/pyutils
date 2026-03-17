@@ -30,6 +30,7 @@ classifiers = [
 
 [project.optional-dependencies]
 plotting = ["matplotlib"]
+llh = ["pandas"]
 
 [project.urls]
 Repository = "https://github.com/tianluyuan/pyutils"

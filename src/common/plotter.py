@@ -43,9 +43,9 @@ def colorlines(x, y, ncolors=5, cmapname='viridis_r', **kwargs):
 
     Parameters
     ----------
-    x : pandas.Series
+    x : list or array-like
         x-coordinates of the data.
-    y : pandas.Series
+    y : list or array-like
         y-coordinates of the data.
     ncolors : int, optional
         Number of colors to use.
@@ -60,7 +60,7 @@ def colorlines(x, y, ncolors=5, cmapname='viridis_r', **kwargs):
         chunksize = len(x) // ncolors
         low = i * chunksize
         high = min((i + 1) * chunksize + 1, len(x))  # Add 1 to keep lines connected
-        plt.plot(x.iloc[low:high], y.iloc[low:high], color=cmap(norm(i)), **kwargs)
+        plt.plot(x[low:high], y[low:high], color=cmap(norm(i)), **kwargs)
 
 
 def pdf(func):

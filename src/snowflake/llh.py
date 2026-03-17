@@ -1,8 +1,5 @@
 import os
-try:
-    from functools import lru_cache
-except ImportError:
-    from functools32 import lru_cache
+from functools import lru_cache
 from collections import namedtuple
 from common.calculator import mean_ang, med_ang_res, sphe_to_kent, interval
 import pandas as pd
