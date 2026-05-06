@@ -4,7 +4,7 @@ import os
 import re
 from collections import namedtuple, defaultdict
 from . import standalone
-from icecube.icetray import I3Tray, I3Units
+from icecube.icetray import I3Tray, I3Units, logging
 from icecube import icetray, dataclasses, simclasses, dataio
 from icecube.hdfwriter import I3HDFWriter, I3SimHDFWriter
 from icecube.frame_object_diff import segments
@@ -73,11 +73,25 @@ def update_dom_eff(frame, rde_map):
     rde_map : dict
         Mapping of OMKeys to their respective relative DOM efficiencies (RDE) values.
     """
+    geo = frame['I3Geometry']
     cal = frame['I3Calibration']
+    omgeo = geo.omgeo
     dom_cal = cal.dom_cal
     for dom in rde_map:
-        if dom in dom_cal:
-            dom_cal[dom].relative_dom_eff = rde_map[dom].rde * (1 + 0.35 * rde_map[dom].grp)
+        if dom not in dom_cal:
+            logging.log_warn(f'OM {dom} not in I3Calibration', __name__)
+            continue
+
+        if dom not in omgeo:
+            logging.log_warn(f'OM {dom} not in I3Geometry', __name__)
+            continue
+
+        if (hasattr(omgeo[dom], 'pmttype') and
+            omgeo[dom].pmttype != omgeo[dom].PMTType.Unknown):
+            dom_cal[dom].relative_dom_eff = rde_map[dom].rde
+            continue
+
+        dom_cal[dom].relative_dom_eff = rde_map[dom].rde * (1 + 0.35 * rde_map[dom].grp)
 
 
 def excluded_doms(frame, exclude_list, keep_partial=True):
@@ -104,12 +118,14 @@ def excluded_doms(frame, exclude_list, keep_partial=True):
     """
     excluded = []
     for category in exclude_list:
-        if frame.Has(category):
-            if keep_partial and isinstance(frame[category], dataclasses.I3TimeWindowSeriesMap):
-                continue
-            for k in frame[category]:
-                if isinstance(k, icetray.OMKey):
-                    excluded.append(k)
+        if not frame.Has(category):
+            continue
+
+        if keep_partial and isinstance(frame[category], dataclasses.I3TimeWindowSeriesMap):
+            continue
+        for k in frame[category]:
+            if isinstance(k, icetray.OMKey):
+                excluded.append(k)
 
     return excluded
 
