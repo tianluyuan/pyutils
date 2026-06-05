@@ -86,7 +86,7 @@ def update_dom_eff(frame, rde_map):
     dom_cal = cal.dom_cal
     for dom in rde_map:
         if dom not in dom_cal:
-            logging.log_warn(f'OM {dom} not in I3Calibration', __name__)
+            logging.log_info(f'OM {dom} not in I3Calibration', __name__)
             continue
 
         if dom not in omgeo:
